@@ -3,6 +3,9 @@
 PN="${BASH_SOURCE[0]##*/}"
 PD="${BASH_SOURCE[0]%/*}"
 
+source "${PD}/config.sh.sample" || exit $?
+[ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
+
 function usage() {
 	cat <<EOF
 Usage: ${PN} [Options] [Images ...]
@@ -44,40 +47,42 @@ function check_copy_file() {
 	return 1
 }
 
-function build_ubuntu() {
-	for i in "$@" ; do
-		pushd "${PD}/ubuntu/${i}" >/dev/null || exit $?
-		case "${i}" in
-		12.04)
-			docker build -t tsaikd/ubuntu -rm . || exit $?
-			docker tag tsaikd/ubuntu tsaikd/ubuntu:12.04 || exit $?
+function build() {
+	local imgname="${1}" && shift
+	local tag
+	for tag in "$@" ; do
+		rm -rf "${PD}/tmp/${imgname}/${tag}" || exit $?
+		mkdir -p "${PD}/tmp/${imgname}/${tag}" || exit $?
+		cp -a "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
+		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
+		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
+		case "${imgname}" in
+		ubuntu)
+			case "${tag}" in
+			12.04)
+				docker build -t ${DOCKER_BASE}/ubuntu -rm . || exit $?
+				docker tag ${DOCKER_BASE}/ubuntu ${DOCKER_BASE}/ubuntu:12.04 || exit $?
+				;;
+			dev)
+				docker build -t ${DOCKER_BASE}/ubuntu:dev -rm . || exit $?
+				;;
+			esac
 			;;
-		dev)
-			docker build -t tsaikd/ubuntu:dev -rm . || exit $?
-			;;
-		esac
-		popd >/dev/null || exit $?
-	done
-}
-
-function build_golang() {
-	for i in "$@" ; do
-		pushd "${PD}/golang/${i}" >/dev/null || exit $?
-		case "${i}" in
-		1.2)
-			if ! check_copy_file "go1.2.linux-amd64.tar.gz" "../dev/go1.2.linux-amd64.tar.gz" ; then
-				wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
-			fi
-			sha1sum -c sha1sum || exit $?
-			docker build -t tsaikd/golang -rm . || exit $?
-			docker tag tsaikd/golang tsaikd/golang:1.2 || exit $?
-			;;
-		dev)
-			if ! check_copy_file "go1.2.linux-amd64.tar.gz" "../1.2/go1.2.linux-amd64.tar.gz" ; then
-				wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
-			fi
-			sha1sum -c sha1sum || exit $?
-			docker build -t tsaikd/golang:dev -rm . || exit $?
+		golang)
+			case "${tag}" in
+			1.2)
+				if ! check_copy_file "go1.2.linux-amd64.tar.gz" "../go1.2.linux-amd64.tar.gz" "../dev/go1.2.linux-amd64.tar.gz" ; then
+					wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
+				fi
+				sha1sum -c sha1sum || exit $?
+				docker build -t ${DOCKER_BASE}/golang -rm . || exit $?
+				docker tag ${DOCKER_BASE}/golang ${DOCKER_BASE}/golang:1.2 || exit $?
+				;;
+			dev)
+				check_copy_file "build.sh" "../../ubuntu/dev/build.sh"  || exit $?
+				docker build -t ${DOCKER_BASE}/golang:dev -rm . || exit $?
+				;;
+			esac
 			;;
 		esac
 		popd >/dev/null || exit $?
@@ -85,13 +90,13 @@ function build_golang() {
 }
 
 if [ $# -eq 0 ] ; then
-	build_ubuntu 12.04 dev
-	build_golang 1.2 dev
+	build ubuntu 12.04 dev
+	build golang 1.2 dev
 else
 	for i in "$@" ; do
 		case "${i}" in
-		ubuntu) build_ubuntu 12.04 dev ;;
-		golang) build_golang 1.2 dev ;;
+		ubuntu) build ubuntu 12.04 dev ;;
+		golang) build golang 1.2 dev ;;
 		esac
 	done
 fi

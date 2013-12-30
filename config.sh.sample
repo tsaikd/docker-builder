@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# used for docker image base name, like "tsaikd"/ubuntu
+export DOCKER_BASE="tsaikd"
+

@@ -2,7 +2,9 @@ FROM ubuntu:12.04
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ADD . /opt/docker/tsaikd/ubuntu
+ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu
+
+ADD . $DOCKER_SRC
 
 # env vars
 ENV HOME /root

@@ -1,10 +1,12 @@
-FROM tsaikd/ubuntu
+FROM DOCKER_BASE/ubuntu
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ADD . /opt/docker/tsaikd/ubuntu-dev
+ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu-dev
 
-RUN sh /opt/docker/tsaikd/ubuntu-dev/build.sh
+ADD . $DOCKER_SRC
+
+RUN sh $DOCKER_SRC/build.sh
 
 CMD ["/bin/bash"]
 
