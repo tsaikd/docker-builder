@@ -14,6 +14,7 @@ Options:
 Images: (default: build all images)
   ubuntu
   golang
+  nginx
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
@@ -84,6 +85,17 @@ function build() {
 				;;
 			esac
 			;;
+		nginx)
+			case "${tag}" in
+			latest)
+				docker build -t ${DOCKER_BASE}/nginx -rm . || exit $?
+				;;
+			dev)
+				check_copy_file "build.sh" "../../ubuntu/dev/build.sh"  || exit $?
+				docker build -t ${DOCKER_BASE}/nginx:dev -rm . || exit $?
+				;;
+			esac
+			;;
 		esac
 		popd >/dev/null || exit $?
 	done
@@ -92,11 +104,13 @@ function build() {
 if [ $# -eq 0 ] ; then
 	build ubuntu 12.04 dev
 	build golang 1.2 dev
+	build nginx latest dev
 else
 	for i in "$@" ; do
 		case "${i}" in
-		ubuntu) build ubuntu 12.04 dev ;;
-		golang) build golang 1.2 dev ;;
+		ubuntu) build ${i} 12.04 dev ;;
+		golang) build ${i} 1.2 dev ;;
+		nginx) build ${i} latest dev ;;
 		esac
 	done
 fi

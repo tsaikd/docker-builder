@@ -1,0 +1,3 @@
+deb http://ppa.launchpad.net/nginx/stable/ubuntu precise main
+deb-src http://ppa.launchpad.net/nginx/stable/ubuntu precise main
+

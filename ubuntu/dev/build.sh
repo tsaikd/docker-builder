@@ -5,10 +5,10 @@
 # vim for vi
 # wget for wget
 # git for git
-apt-get -q update || exit $?
-apt-get -q -y dist-upgrade || exit $?
-apt-get -q -y install net-tools iputils-ping vim wget git || exit $?
-apt-get -q  clean || exit $?
+apt-get -qq update || exit $?
+apt-get -qq -y dist-upgrade || exit $?
+apt-get -qq -y install net-tools iputils-ping vim wget git || exit $?
+apt-get -qq  clean || exit $?
 
 # install tsaikd bash
 git clone https://github.com/tsaikd/bash "${HOME}/.my-shell" || exit $?
