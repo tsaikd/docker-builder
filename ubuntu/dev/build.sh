@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$DOCKER_SRC/build-pre.sh"
+
 # net-tools for ifconfig
 # iputils-ping for ping
 # vim for vi
@@ -12,7 +14,7 @@ apt-get -qq  clean || exit $?
 
 # install tsaikd bash
 git clone https://github.com/tsaikd/bash "${HOME}/.my-shell" || exit $?
-sh "$HOME/.my-shell/tools/init.sh" || exit $?
+bash "$HOME/.my-shell/tools/init.sh" || exit $?
 
-bash "$DOCKER_SRC/build-post.sh"
+source "$DOCKER_SRC/build-post.sh"
 

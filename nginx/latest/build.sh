@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$DOCKER_SRC/build-pre.sh"
+
 redist=`sed -n 's/DISTRIB_CODENAME=\(.*\)$/\1/p' /etc/lsb-release`
 
 cp -a "$DOCKER_SRC/nginx.list" /etc/apt/sources.list.d/ || exit $?
@@ -12,5 +14,5 @@ apt-get -qq update || exit $?
 apt-get -qq -y --force-yes install nginx || exit $?
 apt-get -qq clean || exit $?
 
-bash "$DOCKER_SRC/build-post.sh"
+source "$DOCKER_SRC/build-post.sh"
 

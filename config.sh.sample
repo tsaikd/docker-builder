@@ -1,5 +1,11 @@
 #!/bin/bash
 
-# used for docker image base name, like "tsaikd"/ubuntu
+# used for docker image base name, like "tsaikd"/ubuntu, ex: tsaikd
 export DOCKER_BASE="tsaikd"
+
+# apt-proxy, ex: http://apt.tsaikd.org:9999/
+export APT_PROXY=""
+
+# apt-site, ex: http://tw.archive.ubuntu.com/ubuntu/
+export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 
