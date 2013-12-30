@@ -3,6 +3,12 @@ docker
 
 Some Dockerfile
 
+First of all, build images on your local docker host.
+
+```
+./build.sh
+```
+
 ubuntu
 ======
 * 12.04 (lastest)
@@ -22,4 +28,12 @@ Usage:
 ```
 docker run -i -t -d -p 80:80 tsaikd/nginx
 ```
+
+java
+====
+* jre7
+
+tomcat
+======
+* 7
 

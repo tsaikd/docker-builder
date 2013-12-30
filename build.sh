@@ -15,6 +15,8 @@ Images: (default: build all images)
   ubuntu
   golang
   nginx
+  java
+  tomcat
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
@@ -61,11 +63,11 @@ function build() {
 		ubuntu)
 			case "${tag}" in
 			12.04)
-				docker build -t ${DOCKER_BASE}/ubuntu -rm . || exit $?
-				docker tag ${DOCKER_BASE}/ubuntu ${DOCKER_BASE}/ubuntu:12.04 || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname} -rm . || exit $?
+				docker tag ${DOCKER_BASE}/${imgname} ${DOCKER_BASE}/${imgname}:${tag} || exit $?
 				;;
 			dev)
-				docker build -t ${DOCKER_BASE}/ubuntu:dev -rm . || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
 				;;
 			esac
 			;;
@@ -76,25 +78,29 @@ function build() {
 					wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
 				fi
 				sha1sum -c sha1sum || exit $?
-				docker build -t ${DOCKER_BASE}/golang -rm . || exit $?
-				docker tag ${DOCKER_BASE}/golang ${DOCKER_BASE}/golang:1.2 || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname} -rm . || exit $?
+				docker tag ${DOCKER_BASE}/${imgname} ${DOCKER_BASE}/${imgname}:${tag} || exit $?
 				;;
 			dev)
 				check_copy_file "build.sh" "../../ubuntu/dev/build.sh"  || exit $?
-				docker build -t ${DOCKER_BASE}/golang:dev -rm . || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
 				;;
 			esac
 			;;
 		nginx)
 			case "${tag}" in
 			latest)
-				docker build -t ${DOCKER_BASE}/nginx -rm . || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname} -rm . || exit $?
 				;;
 			dev)
 				check_copy_file "build.sh" "../../ubuntu/dev/build.sh"  || exit $?
-				docker build -t ${DOCKER_BASE}/nginx:dev -rm . || exit $?
+				docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
 				;;
 			esac
+			;;
+		*)
+			docker build -t ${DOCKER_BASE}/${imgname} -rm . || exit $?
+			docker tag ${DOCKER_BASE}/${imgname} ${DOCKER_BASE}/${imgname}:${tag} || exit $?
 			;;
 		esac
 		popd >/dev/null || exit $?
@@ -105,12 +111,16 @@ if [ $# -eq 0 ] ; then
 	build ubuntu 12.04 dev
 	build golang 1.2 dev
 	build nginx latest dev
+	build java jre7
+	build tomcat 7
 else
 	for i in "$@" ; do
 		case "${i}" in
 		ubuntu) build ${i} 12.04 dev ;;
 		golang) build ${i} 1.2 dev ;;
 		nginx) build ${i} latest dev ;;
+		java) build ${i} jre7 ;;
+		tomcat) build ${i} 7 ;;
 		esac
 	done
 fi
