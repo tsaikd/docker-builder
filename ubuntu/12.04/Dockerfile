@@ -13,5 +13,5 @@ ENV HOME /root
 RUN echo 'Acquire::http::proxy "http://apt.tsaikd.org:9999";' > /etc/apt/apt.conf
 RUN echo 'deb http://tw.archive.ubuntu.com/ubuntu/ precise main universe' > /etc/apt/sources.list
 
-CMD ["/bin/bash"]
+CMD bash
 

@@ -12,5 +12,5 @@ apt-get -qq update || exit $?
 apt-get -qq -y --force-yes install nginx || exit $?
 apt-get -qq clean || exit $?
 
-echo "daemon off;" >> /etc/nginx/nginx.conf
+bash "$DOCKER_SRC/build-post.sh"
 

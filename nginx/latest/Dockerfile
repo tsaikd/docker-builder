@@ -6,9 +6,9 @@ ENV DOCKER_SRC /opt/docker/DOCKER_BASE/nginx
 
 ADD . $DOCKER_SRC
 
-RUN sh $DOCKER_SRC/build.sh
+RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 80
 
-CMD ["nginx"]
+CMD service nginx start && tail -f /var/log/nginx/error.log
 

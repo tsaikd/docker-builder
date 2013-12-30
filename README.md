@@ -1,39 +1,43 @@
 docker
 ======
 
-Some Dockerfile
+Some customizable Dockerfile scripts
 
-First of all, build images on your local docker host.
+## Global customization
+* [Image]/[Tag]/root/
+> put customization file here will copy to container root ('/')
 
+## Build images
+Build images on your local docker host.
 ```
 ./build.sh
 ```
 
-ubuntu
-======
-* 12.04 (lastest)
-* dev
+## Supported images
+* ubuntu
+	* 12.04
+	* dev
+* golang
+	* 1.2
+	* dev
+* nginx
+	* latest
+	* dev
+* java
+	* jre7
+* tomcat
+	* 7
+	* dev
 
-golang
-======
-* 1.2 (latest)
-* dev
-
-nginx
-=====
-* latest
-* dev
-
-Usage:
+## Run application example
 ```
 docker run -i -t -d -p 80:80 tsaikd/nginx
 ```
 
-java
-====
-* jre7
+```
+docker run -i -t -d -p 8080:8080 tsaikd/tomcat:7
+```
 
-tomcat
-======
-* 7
+## More customization
+* config.sh (see config.sh.sample for more detail)
 

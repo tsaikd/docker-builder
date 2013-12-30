@@ -14,3 +14,5 @@ apt-get -qq  clean || exit $?
 git clone https://github.com/tsaikd/bash "${HOME}/.my-shell" || exit $?
 sh "$HOME/.my-shell/tools/init.sh" || exit $?
 
+bash "$DOCKER_SRC/build-post.sh"
+

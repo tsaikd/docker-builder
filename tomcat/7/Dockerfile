@@ -6,7 +6,7 @@ ENV DOCKER_SRC /opt/docker/DOCKER_BASE/tomcat7
 
 ADD . $DOCKER_SRC
 
-RUN sh $DOCKER_SRC/build.sh
+RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 8080
 
