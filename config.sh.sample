@@ -9,3 +9,12 @@ export APT_PROXY=""
 # apt-site, ex: http://tw.archive.ubuntu.com/ubuntu/
 export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 
+# solr download site, ex: http://www.us.apache.org/dist/lucene/solr/
+export SOLR_SITE="http://ftp.twaren.net/Unix/Web/apache/lucene/solr/"
+
+# solr home, ex: /data/solr
+export SOLR_HOME="/data/solr"
+
+# solr options, ex: -Xmx2000m -XX:MaxPermSize=2000m
+export SOLR_JAVA_OPTS="-Xmx2000m -XX:MaxPermSize=2000m"
+

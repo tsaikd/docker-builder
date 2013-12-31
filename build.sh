@@ -8,7 +8,7 @@ source "${PD}/config.sh.sample" || exit $?
 
 function usage() {
 	cat <<EOF
-Usage: ${PN} [Options] [Images ...]
+Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
   -h       : show this help message
 Images: (default: build all images)
@@ -17,11 +17,13 @@ Images: (default: build all images)
   nginx
   java
   tomcat
+  solr
+Image:Tag, ex: ubuntu:12.04
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
 
-type getopt cat docker >/dev/null || exit $?
+type getopt cat wget docker >/dev/null || exit $?
 
 opt="$(getopt -o h -- "$@")" || usage "Parse options failed"
 
@@ -54,10 +56,34 @@ function build() {
 	local imgname="${1}" && shift
 	local tag
 	for tag in "$@" ; do
+		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
+		# download if need
+		case "${imgname}-${tag}" in
+		golang-1.2)
+			if ! check_copy_file "go1.2.linux-amd64.tar.gz" ; then
+				wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
+			fi
+			;;
+		solr-4.6.0)
+			if ! check_copy_file "${imgname}-${tag}.tgz" ; then
+				wget "http://ftp.twaren.net/Unix/Web/apache/lucene/solr/${tag}/${imgname}-${tag}.tgz" || exit $?
+			fi
+			;;
+		esac
+
+		# checksum if need
+		if [ -f sha1sum ] ; then
+			sha1sum -c sha1sum || exit $?
+		fi
+		popd >/dev/null || exit $?
+
+		# reset tmp directory
 		rm -rf "${PD}/tmp/${imgname}/${tag}" || exit $?
 		mkdir -p "${PD}/tmp/${imgname}/${tag}" || exit $?
 		cp -a "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
 		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
+
+		# change to tmp directory
 		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
 		check_copy_file "config.sh.sample" "../../../config.sh.sample" || exit $?
 		check_copy_file "config.sh" "../../../config.sh" || exit $?
@@ -66,12 +92,6 @@ function build() {
 		if [ "${tag}" == "dev" ] ; then
 			check_copy_file "build.sh" "../../../ubuntu/dev/build.sh" || exit $?
 		fi
-		if [ "${imgname}" == "golang" ] && [ "${tag}" == "1.2" ] ; then
-			if ! check_copy_file "go1.2.linux-amd64.tar.gz" "../go1.2.linux-amd64.tar.gz" ; then
-				wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
-			fi
-			sha1sum -c sha1sum || exit $?
-		fi
 		docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
 		popd >/dev/null || exit $?
 	done
@@ -79,22 +99,24 @@ function build() {
 
 if [ $# -eq 0 ] ; then
 	build ubuntu 12.04 dev
-	build golang 1.2 dev
-	build nginx latest dev
+	build golang 1.2
+	build nginx latest
 	build java jre7
-	build tomcat 7 dev
+	build tomcat 7
+	build solr 4.6.0
 else
 	for i in "$@" ; do
 		if [ "${i##*:}" == "${i}" ] ; then
 			case "${i}" in
 			ubuntu) build ${i} 12.04 dev ;;
-			golang) build ${i} 1.2 dev ;;
-			nginx) build ${i} latest dev ;;
+			golang) build ${i} 1.2 ;;
+			nginx) build ${i} latest ;;
 			java) build ${i} jre7 ;;
-			tomcat) build ${i} 7 dev ;;
+			tomcat) build ${i} 7 ;;
+			solr) build ${i} 4.6.0 ;;
 			esac
 		else
-			build "${i%/*}" "${i##*/}"
+			build "${i%:*}" "${i##*:}"
 		fi
 	done
 fi
