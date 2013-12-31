@@ -85,13 +85,17 @@ if [ $# -eq 0 ] ; then
 	build tomcat 7 dev
 else
 	for i in "$@" ; do
-		case "${i}" in
-		ubuntu) build ${i} 12.04 dev ;;
-		golang) build ${i} 1.2 dev ;;
-		nginx) build ${i} latest dev ;;
-		java) build ${i} jre7 ;;
-		tomcat) build ${i} 7 dev ;;
-		esac
+		if [ "${i##*:}" == "${i}" ] ; then
+			case "${i}" in
+			ubuntu) build ${i} 12.04 dev ;;
+			golang) build ${i} 1.2 dev ;;
+			nginx) build ${i} latest dev ;;
+			java) build ${i} jre7 ;;
+			tomcat) build ${i} 7 dev ;;
+			esac
+		else
+			build "${i%/*}" "${i##*/}"
+		fi
 	done
 fi
 
