@@ -59,6 +59,7 @@ function build() {
 		cp -a "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
 		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
 		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
+		check_copy_file "config.sh.sample" "../../../config.sh.sample" || exit $?
 		check_copy_file "config.sh" "../../../config.sh" || exit $?
 		check_copy_file "build-pre.sh" "../../../ubuntu/build-pre.sh" || exit $?
 		check_copy_file "build-post.sh" "../../../ubuntu/build-post.sh" || exit $?
