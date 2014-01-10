@@ -1,2 +1,6 @@
 #!/bin/bash
 
+bash
+
+true
+

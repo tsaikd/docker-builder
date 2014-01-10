@@ -14,7 +14,7 @@ ENV PATH /opt/go/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p /opt/go
 
 # build.sh
-RUN bash $DOCKER_SRC/build.sh
+RUN bash $DOCKER_SRC/build-all.sh
 
-CMD bash $DOCKER_SRC/start.sh
+CMD bash $DOCKER_SRC/start-all.sh
 

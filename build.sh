@@ -3,8 +3,21 @@
 PN="${BASH_SOURCE[0]##*/}"
 PD="${BASH_SOURCE[0]%/*}"
 
+[ "${PD}" == "." ] && PD="${PWD}"
+
 source "${PD}/config.sh.sample" || exit $?
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
+
+# package list with order, first tag is default
+pkglist="$(cat <<EOF
+  * ubuntu     12.04  12.04-dev
+  +-- java     jre7   jre7-dev  jdk6
+    +-- tomcat 7      7-dev     7.0.47 7.0.47-dev
+    +-- solr   4.6.0  4.6.0-dev
+  +-- nginx    latest dev
+  +-- golang   1.2    1.2-dev
+EOF
+)"
 
 function usage() {
 	cat <<EOF
@@ -12,13 +25,8 @@ Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
   -h       : show this help message
 Images: (default: build all images)
-  ubuntu
-  golang
-  nginx
-  java
-  tomcat
-  solr
-Image:Tag, ex: ubuntu:12.04
+${pkglist}
+Image:Tag, ex: ubuntu:12.04, ex: ubuntu/12.04, ex: ubuntu/12.04/
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
@@ -37,44 +45,70 @@ while true ; do
 done
 
 function check_copy_file() {
-	local check_path="${1}" && shift
-	local possible_path
+	local filename="${1}"
+	local localfile
 
-	[ -f "${check_path}" ] && return 0
+	[ -f "${filename}" ] && return 0
 
-	for possible_path in "$@" ; do
-		if [ -f "${possible_path}" ] ; then
-			cp -a "${possible_path}" "${check_path}" || exit $?
-			return 0
+	localfile="$(find "${PD}" -iname "${filename}" -print -quit)"
+
+	if [ "${localfile}" ] ; then
+		cp -a "${localfile}" "${filename}" || exit $?
+	else
+		return 1
+	fi
+}
+
+function cat_one_file() {
+	local f
+	for f in "$@" ; do
+		if [ -f "${f}" ] ; then
+			cat "${f}"
+			return
 		fi
 	done
+}
 
-	return 1
+function cat_parent_docker_file() {
+	local parent_docker="${PD}/$(cat Dockerfile | sed -n 's/^FROM [^/]\+\///p' | sed 's/:/\//')"
+	local curdir="${PWD}"
+	local f
+
+	[ ! -d "${parent_docker}" ] && return
+	[ "${parent_docker%%/}" == "${PD%%/}" ] && return
+
+	pushd "${parent_docker}" >/dev/null || exit $?
+	if [ "${curdir}" != "${PWD}" ] ; then
+
+		for f in "$@" ; do
+			[ -f "${f}" ] && cat "${f}"
+		done
+
+		cat_parent_docker_file "$@"
+
+	fi
+	popd >/dev/null || exit $?
 }
 
 function build() {
 	local imgname="${1}" && shift
 	local tag
+	local line
+	local filename
+	local url
 	for tag in "$@" ; do
 		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
+
 		# download if need
-		case "${imgname}-${tag}" in
-		golang-1.2)
-			if ! check_copy_file "go1.2.linux-amd64.tar.gz" ; then
-				wget "https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz" || exit $?
-			fi
-			;;
-		solr-4.6.0)
-			if ! check_copy_file "${imgname}-${tag}.tgz" ; then
-				wget "http://ftp.twaren.net/Unix/Web/apache/lucene/solr/${tag}/${imgname}-${tag}.tgz" || exit $?
-			fi
-			;;
-		solr-dev)
-			if ! check_copy_file "${imgname}-4.6.0.tgz" ; then
-				wget "http://ftp.twaren.net/Unix/Web/apache/lucene/solr/${tag}/${imgname}-4.6.0.tgz" || exit $?
-			fi
-			;;
-		esac
+		if [ -f download ] ; then
+			while read line ; do
+				filename="$(awk '{print $1}' <<<"${line}")"
+				url="$(awk '{print $2}' <<<"${line}")"
+				if ! check_copy_file "${filename}" ; then
+					wget -O "${filename}" "${url}" || exit $?
+				fi
+			done <<<"$(grep -v "^#" download | grep -v "^[[:space:]]*$")"
+		fi
 
 		# checksum if need
 		if [ -f sha1sum ] ; then
@@ -90,39 +124,46 @@ function build() {
 
 		# change to tmp directory
 		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
-		check_copy_file "config.sh.sample" "../../../config.sh.sample" || exit $?
-		check_copy_file "config.sh" "../../../config.sh" || exit $?
-		check_copy_file "build-pre.sh" "../../../ubuntu/build-pre.sh" || exit $?
-		check_copy_file "build-post.sh" "../../../ubuntu/build-post.sh" || exit $?
-		if [ "${tag}" == "dev" ] ; then
-			check_copy_file "build.sh" "../../../ubuntu/dev/build.sh" || exit $?
-			check_copy_file "start.sh" "../../../ubuntu/dev/start.sh" || exit $?
-		else
-			check_copy_file "start.sh" "../../../ubuntu/12.04/start.sh" || exit $?
+
+		# generate build-all.sh
+		> build-all.sh
+		cat_one_file "config.sh.sample" "../../../config.sh.sample" >> build-all.sh
+		cat_one_file "config.sh" "../../../config.sh" >> build-all.sh
+		cat_one_file "build-pre.sh" "../../../ubuntu/12.04/build-pre.sh" >> build-all.sh
+		if [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+			cat_one_file "${PD}/ubuntu/12.04-dev/build.sh" >> build-all.sh
 		fi
+		cat_one_file "build.sh" >> build-all.sh
+		cat_one_file "build-post.sh" "../../../ubuntu/12.04/build-post.sh" >> build-all.sh
+
+		# generate start-all.sh
+		> start-all.sh
+		cat_one_file "config.sh.sample" "../../../config.sh.sample" >> start-all.sh
+		cat_one_file "config.sh" "../../../config.sh" >> start-all.sh
+		cat_one_file "start-pre.sh" "../../../ubuntu/12.04/start-pre.sh" >> start-all.sh
+		cat_parent_docker_file "start.sh" >> start-all.sh
+		cat_one_file "start.sh" >> start-all.sh
+		cat_one_file "start-post.sh" "../../../ubuntu/12.04/start-post.sh" >> start-all.sh
+
 		docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
+
 		popd >/dev/null || exit $?
 	done
 }
 
 if [ $# -eq 0 ] ; then
-	build ubuntu 12.04 dev
-	build golang 1.2
-	build nginx latest
-	build java jre7
-	build tomcat 7
-	build solr 4.6.0
+	while read i ; do
+		image="$(awk '{print $1}' <<<"${i}")"
+		tag="$(awk '{print $2}' <<<"${i}")"
+		build "${image}" "${tag}"
+	done <<<"$(sed 's/^[-+* ]*//g' <<<"${pkglist}")"
 else
 	for i in "$@" ; do
+		i="${i%%/}"
+		i="$(sed 's/\//:/g' <<<"${i}")"
 		if [ "${i##*:}" == "${i}" ] ; then
-			case "${i}" in
-			ubuntu) build ${i} 12.04 dev ;;
-			golang) build ${i} 1.2 ;;
-			nginx) build ${i} latest ;;
-			java) build ${i} jre7 ;;
-			tomcat) build ${i} 7 ;;
-			solr) build ${i} 4.6.0 ;;
-			esac
+			tag="$(sed 's/^[-+* ]*//g' <<<"${pkglist}" | grep "^${i}" | awk '{print $2}')"
+			build "${i}" "${tag}"
 		else
 			build "${i%:*}" "${i##*:}"
 		fi
