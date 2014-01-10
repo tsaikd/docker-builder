@@ -10,5 +10,5 @@ RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 8080
 
-CMD service tomcat7 start && bash
+CMD bash $DOCKER_SRC/start.sh
 

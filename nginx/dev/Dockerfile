@@ -10,5 +10,5 @@ RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 80
 
-CMD service nginx start && bash
+CMD bash $DOCKER_SRC/start.sh
 

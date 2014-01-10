@@ -10,5 +10,5 @@ RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 80
 
-CMD service nginx start && tail -f /var/log/nginx/error.log
+CMD bash $DOCKER_SRC/start.sh
 

@@ -10,5 +10,5 @@ RUN bash $DOCKER_SRC/build.sh
 
 EXPOSE 8080
 
-CMD $DOCKER_SRC/run.sh
+CMD bash $DOCKER_SRC/start.sh
 

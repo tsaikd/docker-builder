@@ -69,6 +69,11 @@ function build() {
 				wget "http://ftp.twaren.net/Unix/Web/apache/lucene/solr/${tag}/${imgname}-${tag}.tgz" || exit $?
 			fi
 			;;
+		solr-dev)
+			if ! check_copy_file "${imgname}-4.6.0.tgz" ; then
+				wget "http://ftp.twaren.net/Unix/Web/apache/lucene/solr/${tag}/${imgname}-4.6.0.tgz" || exit $?
+			fi
+			;;
 		esac
 
 		# checksum if need
@@ -91,6 +96,9 @@ function build() {
 		check_copy_file "build-post.sh" "../../../ubuntu/build-post.sh" || exit $?
 		if [ "${tag}" == "dev" ] ; then
 			check_copy_file "build.sh" "../../../ubuntu/dev/build.sh" || exit $?
+			check_copy_file "start.sh" "../../../ubuntu/dev/start.sh" || exit $?
+		else
+			check_copy_file "start.sh" "../../../ubuntu/12.04/start.sh" || exit $?
 		fi
 		docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
 		popd >/dev/null || exit $?

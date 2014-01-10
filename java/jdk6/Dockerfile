@@ -8,5 +8,5 @@ ADD . $DOCKER_SRC
 
 RUN bash $DOCKER_SRC/build.sh
 
-CMD bash
+CMD bash $DOCKER_SRC/start.sh
 

@@ -16,5 +16,5 @@ RUN mkdir -p /opt/go
 # build.sh
 RUN bash $DOCKER_SRC/build.sh
 
-CMD bash
+CMD bash $DOCKER_SRC/start.sh
 
