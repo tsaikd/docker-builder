@@ -9,6 +9,9 @@ export APT_PROXY=""
 # apt-site, ex: http://tw.archive.ubuntu.com/ubuntu/
 export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 
+# root password, used in dev mode
+export ROOT_PASSWD="CHANGE_IT"
+
 # solr home, ex: /data/solr
 export SOLR_HOME="/data/solr"
 
