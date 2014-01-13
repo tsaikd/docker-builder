@@ -21,3 +21,6 @@ chpasswd <<<"root:${ROOT_PASSWD}"
 git clone https://github.com/tsaikd/bash "${HOME}/.my-shell" || exit $?
 bash "$HOME/.my-shell/tools/init.sh" || exit $?
 
+# set environment for ssh
+env >> /etc/environment
+
