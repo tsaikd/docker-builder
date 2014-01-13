@@ -63,6 +63,11 @@ function cat_one_file() {
 	local f
 	for f in "$@" ; do
 		if [ -f "${f}" ] ; then
+			if [ "${f:0:${#PD}}" == "${PWD}" ] ; then
+				echo "# ${f:${#PWD}+1}"
+			else
+				echo "# ${f}"
+			fi
 			cat "${f}"
 			return
 		fi
@@ -81,7 +86,7 @@ function cat_parent_docker_file() {
 	if [ "${curdir}" != "${PWD}" ] ; then
 
 		for f in "$@" ; do
-			[ -f "${f}" ] && cat "${f}"
+			cat_one_file "${PWD}/${f}"
 		done
 
 		cat_parent_docker_file "$@"
@@ -140,26 +145,36 @@ function build() {
 
 		# generate build-all.sh
 		> build-all.sh
-		cat_one_file "config.sh.sample" "../../../config.sh.sample" >> build-all.sh
-		cat_one_file "config.sh" "../../../config.sh" >> build-all.sh
-		cat_one_file "build-pre.sh" "../../../ubuntu/12.04/build-pre.sh" >> build-all.sh
-		if [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		cat_one_file "${PD}/config.sh.sample" >> build-all.sh
+		cat_one_file "${PD}/config.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/config.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/build-pre.sh" "${PD}/ubuntu/12.04/build-pre.sh" >> build-all.sh
+		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
+			true
+		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
 			cat_one_file "${PD}/ubuntu/12.04-dev/build.sh" >> build-all.sh
-		elif [ "${imgname}:${tag}" != "ubuntu:12.04-dev" ] ; then
-			cat_one_file "build.sh" >> build-all.sh
 		fi
-		cat_one_file "build-post.sh" "../../../ubuntu/12.04/build-post.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/12.04/build-post.sh" >> build-all.sh
 
 		# generate start-all.sh
 		> start-all.sh
-		cat_one_file "config.sh.sample" "../../../config.sh.sample" >> start-all.sh
-		cat_one_file "config.sh" "../../../config.sh" >> start-all.sh
-		cat_one_file "start-pre.sh" "../../../ubuntu/12.04/start-pre.sh" >> start-all.sh
+		cat_one_file "${PD}/config.sh.sample" >> start-all.sh
+		cat_one_file "${PD}/config.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/config.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/start-pre.sh" "${PD}/ubuntu/12.04/start-pre.sh" >> start-all.sh
+		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
+			true
+		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+			cat_one_file "${PD}/ubuntu/12.04-dev/start.sh" >> start-all.sh
+		fi
 		cat_parent_docker_file "start.sh" >> start-all.sh
-		cat_one_file "start.sh" >> start-all.sh
-		cat_one_file "start-post.sh" "../../../ubuntu/12.04/start-post.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/start.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/12.04/start-post.sh" >> start-all.sh
 
-		docker build -t ${DOCKER_BASE}/${imgname}:${tag} -rm . || exit $?
+		docker build -t "${DOCKER_BASE}/${imgname}:${tag}" -rm . || exit $?
 
 		popd >/dev/null || exit $?
 	done
