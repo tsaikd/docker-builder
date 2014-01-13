@@ -132,8 +132,9 @@ function build() {
 		cat_one_file "build-pre.sh" "../../../ubuntu/12.04/build-pre.sh" >> build-all.sh
 		if [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
 			cat_one_file "${PD}/ubuntu/12.04-dev/build.sh" >> build-all.sh
+		elif [ "${imgname}:${tag}" != "ubuntu:12.04-dev" ] ; then
+			cat_one_file "build.sh" >> build-all.sh
 		fi
-		cat_one_file "build.sh" >> build-all.sh
 		cat_one_file "build-post.sh" "../../../ubuntu/12.04/build-post.sh" >> build-all.sh
 
 		# generate start-all.sh
