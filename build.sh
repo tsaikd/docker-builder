@@ -70,7 +70,7 @@ function cat_one_file() {
 }
 
 function cat_parent_docker_file() {
-	local parent_docker="${PD}/$(cat Dockerfile | sed -n 's/^FROM [^/]\+\///p' | sed 's/:/\//')"
+	local parent_docker="${PD}/$(sed -n 's/^FROM [^/]\+\///p' Dockerfile | sed 's/:/\//')"
 	local curdir="${PWD}"
 	local f
 
@@ -96,8 +96,21 @@ function build() {
 	local line
 	local filename
 	local url
+	local parent_imgname
+	local parent_tag
 	for tag in "$@" ; do
 		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
+
+		# check parent image exists
+		line="$(sed -n 's/^FROM\s\+DOCKER_BASE\///p' Dockerfile)"
+		if [ "${line}" ] ; then
+			parent_imgname="$(cut -d: -f1 <<<"${line}")"
+			parent_tag="$(cut -d: -f2 <<<"${line}")"
+			parent_tag="${parent_tag:-latest}"
+			if [ -z "$(docker images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
+				build "${parent_imgname}" "${parent_tag}" || exit $?
+			fi
+		fi
 
 		# download if need
 		if [ -f download ] ; then
