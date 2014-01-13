@@ -53,7 +53,7 @@ function check_copy_file() {
 	localfile="$(find "${PD}" -iname "${filename}" -print -quit)"
 
 	if [ "${localfile}" ] ; then
-		cp -a "${localfile}" "${filename}" || exit $?
+		cp -aL "${localfile}" "${filename}" || exit $?
 	else
 		return 1
 	fi
@@ -119,7 +119,7 @@ function build() {
 		# reset tmp directory
 		rm -rf "${PD}/tmp/${imgname}/${tag}" || exit $?
 		mkdir -p "${PD}/tmp/${imgname}/${tag}" || exit $?
-		cp -a "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
+		cp -aL "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
 		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
 
 		# change to tmp directory
