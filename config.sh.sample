@@ -18,3 +18,6 @@ export SOLR_HOME="/data/solr"
 # solr options, ex: -Xmx2000m -XX:MaxPermSize=2000m
 export SOLR_JAVA_OPTS="-Xmx2000m -XX:MaxPermSize=2000m"
 
+# mysql root password
+export MYSQL_ROOT_PASSWD="${ROOT_PASSWD}"
+

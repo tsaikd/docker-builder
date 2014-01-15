@@ -16,6 +16,7 @@ pkglist="$(cat <<EOF
     +-- solr   4.6.0  4.6.0-dev
   +-- nginx    latest dev
   +-- golang   1.2    1.2-dev
+  +-- mysql    latest dev
 EOF
 )"
 
