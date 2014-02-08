@@ -21,3 +21,12 @@ export SOLR_JAVA_OPTS="-Xmx2000m -XX:MaxPermSize=2000m"
 # mysql root password
 export MYSQL_ROOT_PASSWD="${ROOT_PASSWD}"
 
+# phpvirtualbox virtualbox run user
+export PHPVIRTUALBOX_RUN_USER="vbox"
+
+# phpvirtualbox virtualbox run user password
+export PHPVIRTUALBOX_RUN_PASS="${ROOT_PASSWD}"
+
+# phpvirtualbox virtualbox link to vboxwebsrv url
+export PHPVIRTUALBOX_VBOXWEBSRV_URL="http://127.0.0.1:18083/"
+
