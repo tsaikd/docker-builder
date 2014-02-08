@@ -1,8 +1,8 @@
-FROM DOCKER_BASE/ubuntu:phpvirtualbox-4.3.1
+FROM DOCKER_BASE/phpvirtualbox:4.3.1
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu-phpvirtualbox-4.3.1-dev
+ENV DOCKER_SRC /opt/docker/DOCKER_BASE/phpvirtualbox-4.3.1-dev
 
 EXPOSE 80
 
