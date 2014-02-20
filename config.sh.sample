@@ -3,6 +3,8 @@
 # used for docker image base name, like "tsaikd"/ubuntu, ex: tsaikd
 export DOCKER_BASE="tsaikd"
 
+export LANG="en_US.utf8"
+
 # apt-proxy, ex: http://apt.tsaikd.org:9999/
 export APT_PROXY=""
 
