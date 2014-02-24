@@ -1,7 +1,6 @@
 #!/bin/bash
 
 dpkg-divert --local --rename --add /sbin/initctl || exit $?
-ln -s /bin/true /sbin/initctl || exit $?
 
 debconf-set-selections <<< "mysql-server mysql-server/root_password password ${MYSQL_ROOT_PASSWD}"
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${MYSQL_ROOT_PASSWD}"
