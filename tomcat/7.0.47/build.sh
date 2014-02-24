@@ -15,3 +15,15 @@ ln -s /etc/tomcat7 conf || exit $?
 ln -s ../../log/tomcat7 logs || exit $?
 ln -s ../../cache/tomcat7 work || exit $?
 
+cat > "/etc/tomcat7/tomcat-users.xml" <<EOF
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <role rolename="admin-gui"/>
+  <user username="${TOMCAT_ADMIN_NAME}" password="${TOMCAT_ADMIN_PASSWORD}" roles="manager-gui,manager-script,admin-gui"/>
+</tomcat-users>
+EOF
+
+rm -f /var/log/tomcat7/*
+

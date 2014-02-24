@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ver="7.0.26"
+ver="7.0.52"
 
 tar -C /usr/local -xzf $DOCKER_SRC/apache-tomcat-$ver.tar.gz || exit $?
 

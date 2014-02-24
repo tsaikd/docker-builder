@@ -14,6 +14,12 @@ export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 # root password, used in dev mode
 export ROOT_PASSWD="CHANGE_IT"
 
+# tomcat manager name
+export TOMCAT_ADMIN_NAME="admin"
+
+# tomcat manager password
+export TOMCAT_ADMIN_PASSWORD="${ROOT_PASSWD}"
+
 # solr home, ex: /data/solr
 export SOLR_HOME="/data/solr"
 

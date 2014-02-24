@@ -35,7 +35,7 @@ EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
 
-type getopt cat wget docker >/dev/null || exit $?
+type getopt cat wget sha1sum md5sum docker >/dev/null || exit $?
 
 opt="$(getopt -o hr -- "$@")" || usage "Parse options failed"
 
@@ -136,6 +136,9 @@ function build() {
 		# checksum if need
 		if [ -f sha1sum ] ; then
 			sha1sum -c sha1sum || exit $?
+		fi
+		if [ -f md5sum ] ; then
+			md5sum -c md5sum || exit $?
 		fi
 		popd >/dev/null || exit $?
 
