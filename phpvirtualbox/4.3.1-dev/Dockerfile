@@ -4,6 +4,7 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC /opt/docker/DOCKER_BASE/phpvirtualbox-4.3.1-dev
 
+EXPOSE 22
 EXPOSE 80
 
 ADD . $DOCKER_SRC

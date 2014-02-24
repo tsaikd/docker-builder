@@ -4,6 +4,7 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC /opt/docker/DOCKER_BASE/apache2-php5-dev
 
+EXPOSE 22
 EXPOSE 80
 
 ADD . $DOCKER_SRC

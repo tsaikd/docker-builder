@@ -12,7 +12,7 @@ source "${PD}/config.sh.sample" || exit $?
 pkglist="$(cat <<EOF
   * ubuntu            12.04  12.04-dev apt-cacher-ng apt-cacher-ng-dev
   +-- java            jre7   jre7-dev  jdk6
-    +-- tomcat        7      7-dev     7.0.50        7.0.50-dev
+    +-- tomcat        7      7-dev     7.0.52        7.0.52-dev
     +-- solr          4.6.0  4.6.0-dev
   +-- apache2         php5   php5-dev
     +-- phpvirtualbox 4.3.1 4.3.1-dev
@@ -28,8 +28,10 @@ Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
   -h       : show this help message
   -r       : rebuild all existed images
+
 Images: (default: build all images)
 ${pkglist}
+
 Image:Tag, ex: ubuntu:12.04, ex: ubuntu/12.04, ex: ubuntu/12.04/
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0

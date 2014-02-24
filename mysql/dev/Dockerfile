@@ -4,11 +4,12 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC /opt/docker/DOCKER_BASE/mysql-dev
 
+EXPOSE 22
+EXPOSE 3306
+
 ADD . $DOCKER_SRC
 
 RUN bash $DOCKER_SRC/build-all.sh
-
-EXPOSE 3306
 
 CMD bash $DOCKER_SRC/start-all.sh
 
