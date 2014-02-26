@@ -9,6 +9,12 @@ Some customizable Dockerfile scripts
 * [Image]/[Tag]/custom/
 > Put run time customization file here will copy to container root ('/')
 
+## Custom start script
+* /start-pre.sh
+> You can put custom start script in [Image]/[Tag]/root/ or [Image]/[Tag]/custom/
+* /start.sh
+> You can put custom start script in [Image]/[Tag]/root/ or [Image]/[Tag]/custom/
+
 ## Build images
 Build images on your local docker host.
 ```
@@ -98,4 +104,17 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 * ./Image/Tag/root/config.sh
 * ./Image/Tag/custom/config.sh
 	* This config can change at run time, others are generated at build time
+
+===========================
+
+## Customization example
+* I do not want the tomcat unpack wars in webapps.
+	* write a script /docker-data/tomcat-7/custom/start-pre.sh
+	```
+	sed -i 's/unpackWARs="true"/unpackWARs="false"/' /etc/tomcat7/server.xml
+	```
+	* run docker, and mount into /opt/docker/tsaikd/tomcat-7/custom/start-pre.sh
+	```
+	docker run -i -t -d -p 8080 -v /docker-data/tomcat-7/custom:/opt/docker/tsaikd/tomcat-7/custom tsaikd/tomcat:7
+	```
 
