@@ -1,9 +1,7 @@
 #!/bin/bash
 
 PN="${BASH_SOURCE[0]##*/}"
-PD="${BASH_SOURCE[0]%/*}"
-
-[ "${PD}" == "." ] && PD="${PWD}"
+PD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${PD}/config.sh.sample" || exit $?
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
@@ -37,7 +35,16 @@ EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
 
-type getopt cat wget sha1sum md5sum docker >/dev/null || exit $?
+if hash docker 2>/dev/null ; then
+	docker="docker"
+elif hash docker.io 2>/dev/null ; then
+	docker="docker.io"
+else
+	echo "docker command not found"
+	exit 1
+fi
+
+type getopt cat wget sha1sum md5sum >/dev/null || exit $?
 
 opt="$(getopt -o hr -- "$@")" || usage "Parse options failed"
 
@@ -119,7 +126,7 @@ function build() {
 			parent_imgname="$(cut -d: -f1 <<<"${line}")"
 			parent_tag="$(cut -d: -f2 <<<"${line}")"
 			parent_tag="${parent_tag:-latest}"
-			if [ -z "$(docker images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
+			if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
 				build "${parent_imgname}" "${parent_tag}" || exit $?
 			fi
 		fi
@@ -184,7 +191,7 @@ function build() {
 		cat_one_file "${PD}/${imgname}/${tag}/start.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/12.04/start-post.sh" >> start-all.sh
 
-		docker build -t "${DOCKER_BASE}/${imgname}:${tag}" -rm . || exit $?
+		${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" -rm . || exit $?
 
 		popd >/dev/null || exit $?
 	done
@@ -192,7 +199,7 @@ function build() {
 
 function rebuild() {
 	echo "Collecting current images info ..."
-	local images="$(docker images | sed '1d' | awk '/^'"${DOCKER_BASE}"'\//{print $1"/"$2}' | cut -d/ -f2-)"
+	local images="$(${docker} images | sed '1d' | awk '/^'"${DOCKER_BASE}"'\//{print $1"/"$2}' | cut -d/ -f2-)"
 	local pkgline
 	local pkgname
 	local pkgtag
