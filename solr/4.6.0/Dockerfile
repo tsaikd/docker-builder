@@ -4,7 +4,7 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC /opt/docker/DOCKER_BASE/solr-4.6.0
 
-EXPOSE 8080
+EXPOSE 8983
 
 ADD . $DOCKER_SRC
 

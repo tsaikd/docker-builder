@@ -63,12 +63,16 @@ function check_copy_file() {
 	local filename="${1}"
 	local localfile
 
-	[ -f "${filename}" ] && return 0
+	[ -s "${filename}" ] && return 0
 
-	localfile="$(find "${PD}" -iname "${filename}" -print -quit)"
+	localfile="$(find "${PD}" -iname "${filename}" ! -empty -print -quit)"
 
 	if [ "${localfile}" ] ; then
 		cp -aL "${localfile}" "${filename}" || exit $?
+	fi
+
+	if [ -s "${filename}" ] ; then
+		return 0
 	else
 		return 1
 	fi
@@ -138,7 +142,7 @@ function build() {
 				filename="$(awk '{print $1}' <<<"${line}")"
 				url="$(awk '{print $2}' <<<"${line}")"
 				if ! check_copy_file "${filename}" ; then
-					wget -O "${filename}" "${url}" || exit $?
+					wget -O "${filename}" "${url}"
 				fi
 			done <<<"$(grep -v "^#" download | grep -v "^[[:space:]]*$")"
 		fi
