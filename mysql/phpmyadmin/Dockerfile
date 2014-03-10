@@ -1,10 +1,9 @@
-FROM DOCKER_BASE/mysql:phpmyadmin
+FROM DOCKER_BASE/mysql:latest
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/mysql-dev
+ENV DOCKER_SRC /opt/docker/DOCKER_BASE/mysql-phpmyadmin
 
-EXPOSE 22
 EXPOSE 80
 EXPOSE 3306
 

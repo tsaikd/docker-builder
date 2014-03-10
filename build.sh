@@ -8,16 +8,16 @@ source "${PD}/config.sh.sample" || exit $?
 
 # package list with order, first tag is default
 pkglist="$(cat <<EOF
-  * ubuntu            12.04  12.04-dev apt-cacher-ng apt-cacher-ng-dev
-  +-- java            jre7   jre7-dev  jdk6
-    +-- tomcat        7      7-dev     7.0.52        7.0.52-dev
+  * ubuntu            12.04  12.04-dev  apt-cacher-ng apt-cacher-ng-dev
+  +-- java            jre7   jre7-dev   jdk6
+    +-- tomcat        7      7-dev      7.0.52        7.0.52-dev
       +-- nexus       2.7.2  2.7.2-dev
     +-- solr          4.6.0  4.6.0-dev
   +-- apache2         php5   php5-dev
     +-- phpvirtualbox 4.3.1  4.3.1-dev
   +-- nginx           latest dev
   +-- golang          1.2    1.2-dev
-  +-- mysql           latest dev
+  +-- mysql           latest phpmyadmin dev
 EOF
 )"
 
