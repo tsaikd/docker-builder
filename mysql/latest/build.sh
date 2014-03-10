@@ -10,4 +10,5 @@ apt-get -q -y --force-yes install mysql-server|| exit $?
 apt-get -q clean || exit $?
 
 sed -i '/^bind-address/{s/127.0.0.1/0.0.0.0/}' /etc/mysql/my.cnf
+sed -i '/^\[mysqld\]/a \character-set-server=utf8\ncollation-server=utf8_general_ci\n' /etc/mysql/my.cnf
 
