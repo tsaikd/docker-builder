@@ -18,6 +18,7 @@ pkglist="$(cat <<EOF
   +-- nginx           latest dev
   +-- golang          1.2    1.2-dev
   +-- mysql           latest phpmyadmin dev
+  +-- nodejs          ppa    ppa-dev
 EOF
 )"
 

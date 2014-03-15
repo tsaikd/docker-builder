@@ -1,0 +1,2 @@
+deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu precise main
+deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu precise main
