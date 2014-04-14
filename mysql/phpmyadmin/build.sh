@@ -10,3 +10,10 @@ apt-get -q update || exit $?
 apt-get -q -y install phpmyadmin || exit $?
 apt-get -q clean || exit $?
 
+confpath="/etc/apache2/sites-enabled/000-default"
+line="$(sed -n "/Directory \/var\/www\//=" "${confpath}")"
+line="$(sed -n "${line},+5{/Allow/=}" "${confpath}")"
+sed -i "${line}{s/None/All/}" "${confpath}"
+
+echo "Redirect 301 / /phpmyadmin/" >> "/var/www/.htaccess"
+
