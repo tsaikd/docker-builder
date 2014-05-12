@@ -48,12 +48,13 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 
 ## Image structure
 * Image name (ubuntu)
-	* Tag name (12.04)
+	* Tag name (stable)
 		* Dockerfile (Dockerfile)
 			* DOCKER_BASE will be replaced with DOCKER_BASE variable in config.sh
 			* Put add build data to DOCKER_SRC in image file
 		* Build image script (build.sh)
 		* Default start CMD (start.sh)
+		* Default test CMD (test.sh)
 		* Download file list (download)
 		* SHA1 hash checksum file (sha1sum)
 		* Build time custom root filesystem (root)
@@ -62,6 +63,8 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 		* After build image script, usually no need (build-post.sh)
 		* Before start CMD, usually no need (start-pre.sh)
 		* After start CMD, usually no need (start-post.sh)
+		* Before test CMD, usually no need (test-pre.sh)
+		* After test CMD, usually no need (test-post.sh)
 		* Final build image script, auto generate (build-all.sh)
 			* Concat list
 				* config.sh.sample
@@ -77,13 +80,21 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 				* parent dockers start.sh
 				* start.sh
 				* start-post.sh
-	* Tag name suffix -dev (12.04-dev)
+		* Final test CMD, auto generate (test-all.sh)
+			* Concat list
+				* config.sh.sample
+				* config.sh
+				* test-pre.sh
+				* parent dockers test.sh
+				* test.sh
+				* test-post.sh
+	* Tag name suffix -dev (stable-dev)
 		* Final build image script, auto generate (build-all.sh)
 			* Concat list
 				* config.sh.sample
 				* config.sh
 				* build-pre.sh
-				* ubuntu/12.04-dev/build.sh
+				* ubuntu/stable-dev/build.sh
 				* build.sh
 				* build-post.sh
 		* Final start CMD, auto generate (start-all.sh)
@@ -91,10 +102,19 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 				* config.sh.sample
 				* config.sh
 				* start-pre.sh
-				* ubuntu/12.04-dev/start.sh
+				* ubuntu/stable-dev/start.sh
 				* parent dockers start.sh
 				* start.sh
 				* start-post.sh
+		* Final test CMD, auto generate (test-all.sh)
+			* Concat list
+				* config.sh.sample
+				* config.sh
+				* test-pre.sh
+				* ubuntu/stable-dev/test.sh
+				* parent dockers test.sh
+				* test.sh
+				* test-post.sh
 
 ## Config loading order
 * ./config.sh.sample

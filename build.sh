@@ -183,6 +183,24 @@ function build() {
 		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
 
+		# generate test-all.sh
+		> test-all.sh
+		cat_one_file "${PD}/config.sh.sample" >> test-all.sh
+		cat_one_file "${PD}/config.sh" >> test-all.sh
+		cat_one_file "${PD}/${imgname}/config.sh" >> test-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> test-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
+		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
+			true
+		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
+			true
+		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+			cat_one_file "${PD}/${imgname}/${tag}/test.sh" "${PD}/ubuntu/stable-dev/test.sh" >> test-all.sh
+		fi
+		cat_parent_docker_file "test.sh" >> test-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/test.sh" >> test-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/test-post.sh" "${PD}/ubuntu/stable/test-post.sh" >> test-all.sh
+
 		# generate start-all.sh
 		> start-all.sh
 		cat_one_file "${PD}/config.sh.sample" >> start-all.sh
