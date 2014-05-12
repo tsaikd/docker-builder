@@ -11,6 +11,7 @@ apt-get -q -y install vim wget psmisc git openssh-server || exit $?
 apt-get -q  clean || exit $?
 
 # prepare ssh server
+sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config || exit $?
 mkdir -p /var/run/sshd
 chpasswd <<<"root:${ROOT_PASSWD}"
 

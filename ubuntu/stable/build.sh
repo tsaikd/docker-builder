@@ -10,6 +10,10 @@ if [ "${APT_SITE}" ] ; then
 	echo "deb ${APT_SITE} trusty-security main universe" >> /etc/apt/sources.list
 fi
 
+if [ -f "${TIMEZONE_PATH}" ] ; then
+	cp -Lf "${TIMEZONE_PATH}" /etc/localtime
+fi
+
 locale-gen "${LANG}" || exit $?
 
 dpkg-reconfigure locales || exit $?

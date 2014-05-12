@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/usr/sbin/sshd || exit $?
+service ssh restart || exit $?
 
 true
 

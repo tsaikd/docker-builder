@@ -166,6 +166,13 @@ function build() {
 		# change to tmp directory
 		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
 
+		# generate root ssh key file
+		mkdir -p "root/root/.ssh" || exit $?
+		for filename in ${ROOT_PUBKEY} ; do
+			cat "${filename}" >> root/root/.ssh/authorized_keys || exit $?
+		done
+		chmod 600 root/root/.ssh/authorized_keys || exit $?
+
 		# generate build-all.sh
 		> build-all.sh
 		cat_one_file "${PD}/config.sh.sample" >> build-all.sh

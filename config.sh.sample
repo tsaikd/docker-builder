@@ -6,6 +6,9 @@ export DOCKER_BASE="tsaikd"
 # reset language
 export LANG="en_US.UTF-8"
 
+# timezone file path
+export TIMEZONE_PATH="/usr/share/zoneinfo/UTC"
+
 # apt-proxy, ex: http://apt.tsaikd.org:9999/
 export APT_PROXY=""
 
@@ -14,6 +17,9 @@ export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 
 # root password, used in dev mode
 export ROOT_PASSWD="CHANGE_IT"
+
+# root ssh key path, used in dev mode, seperated with space
+export ROOT_PUBKEY="/root/.ssh/id_rsa.pub"
 
 # tomcat manager name
 export TOMCAT_ADMIN_NAME="admin"
