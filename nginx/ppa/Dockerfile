@@ -1,4 +1,4 @@
-FROM DOCKER_BASE/ubuntu:12.04
+FROM DOCKER_BASE/ubuntu:stable
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
