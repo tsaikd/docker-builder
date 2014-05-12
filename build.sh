@@ -15,7 +15,7 @@ pkglist="$(cat <<EOF
     +-- solr          4.6.0  4.6.0-dev
   +-- apache2         php5   php5-dev
     +-- phpvirtualbox 4.3.1  4.3.1-dev
-  +-- nginx           latest dev
+  +-- nginx           latest dev        ppa           ppa-dev
   +-- golang          1.2    1.2-dev
   +-- mysql           latest phpmyadmin dev
   +-- nodejs          ppa    ppa-dev
