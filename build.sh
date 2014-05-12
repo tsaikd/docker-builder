@@ -8,14 +8,14 @@ source "${PD}/config.sh.sample" || exit $?
 
 # package list with order, first tag is default
 pkglist="$(cat <<EOF
-  * ubuntu            12.04  12.04-dev  apt-cacher-ng apt-cacher-ng-dev
+  * ubuntu            stable satble-dev 12.04  12.04-dev  apt-cacher-ng apt-cacher-ng-dev
   +-- java            jre7   jre7-dev   jdk6
-    +-- tomcat        7      7-dev      7.0.52        7.0.52-dev
+    +-- tomcat        7      7-dev      7.0.52            7.0.52-dev
       +-- nexus       2.7.2  2.7.2-dev
     +-- solr          4.6.0  4.6.0-dev
   +-- apache2         php5   php5-dev
     +-- phpvirtualbox 4.3.1  4.3.1-dev
-  +-- nginx           latest dev        ppa           ppa-dev
+  +-- nginx           latest dev        ppa               ppa-dev
   +-- golang          1.2    1.2-dev
   +-- mysql           latest phpmyadmin dev
   +-- nodejs          ppa    ppa-dev
@@ -32,7 +32,7 @@ Options:
 Images: (default: build all images)
 ${pkglist}
 
-Image:Tag, ex: ubuntu:12.04, ex: ubuntu/12.04, ex: ubuntu/12.04/
+Image:Tag, ex: ubuntu:stable, ex: ubuntu/stable, ex: ubuntu/stable/
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
@@ -172,14 +172,16 @@ function build() {
 		cat_one_file "${PD}/config.sh" >> build-all.sh
 		cat_one_file "${PD}/${imgname}/config.sh" >> build-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> build-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/build-pre.sh" "${PD}/ubuntu/12.04/build-pre.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
 		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
 			true
+		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
+			true
 		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
-			cat_one_file "${PD}/ubuntu/12.04-dev/build.sh" >> build-all.sh
+			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
 		fi
 		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/12.04/build-post.sh" >> build-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
 
 		# generate start-all.sh
 		> start-all.sh
@@ -187,17 +189,19 @@ function build() {
 		cat_one_file "${PD}/config.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/config.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/start-pre.sh" "${PD}/ubuntu/12.04/start-pre.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
 		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
 			true
+		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
+			true
 		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
-			cat_one_file "${PD}/ubuntu/12.04-dev/start.sh" >> start-all.sh
+			cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
 		fi
 		cat_parent_docker_file "start.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/start.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/12.04/start-post.sh" >> start-all.sh
+		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/stable/start-post.sh" >> start-all.sh
 
-		${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" -rm . || exit $?
+		${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
 
 		popd >/dev/null || exit $?
 	done
