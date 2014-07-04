@@ -2,12 +2,13 @@
 
 # vim for vim
 # wget for wget
+# curl for curl
 # psmisc for killall
 # git for git
 # openssh-server for sshd
 apt-get -q update || exit $?
 apt-get -q -y dist-upgrade || exit $?
-apt-get -q -y install vim wget psmisc git openssh-server || exit $?
+apt-get -q -y install vim wget curl psmisc git openssh-server || exit $?
 apt-get -q  clean || exit $?
 
 # prepare ssh server
