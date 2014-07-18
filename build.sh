@@ -9,6 +9,7 @@ source "${PD}/config.sh.sample" || exit $?
 # package list with order, first tag is default
 pkglist="$(cat <<EOF
   * ubuntu            stable satble-dev 12.04  12.04-dev  apt-cacher-ng apt-cacher-ng-dev
+  +-- squid3          latest
   +-- java            jre7   jre7-dev   jdk7   jdk7-dev   jdk6
     +-- tomcat        7      7-dev      7.0.52 7.0.52-dev
       +-- nexus       2.7.2  2.7.2-dev
