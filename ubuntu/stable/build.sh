@@ -10,8 +10,9 @@ if [ "${APT_SITE}" ] ; then
 	echo "deb ${APT_SITE} trusty-security main universe" >> /etc/apt/sources.list
 fi
 
-if [ -f "${TIMEZONE_PATH}" ] ; then
-	cp -Lf "${TIMEZONE_PATH}" /etc/localtime
+if [ -f "/usr/share/zoneinfo/${TIMEZONE}" ] ; then
+	echo "${TIMEZONE}" > /etc/timezone
+	dpkg-reconfigure --frontend noninteractive tzdata || exit $?
 fi
 
 locale-gen "${LANG}" || exit $?

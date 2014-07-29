@@ -6,8 +6,8 @@ export DOCKER_BASE="tsaikd"
 # reset language
 export LANG="en_US.UTF-8"
 
-# timezone file path
-export TIMEZONE_PATH="/usr/share/zoneinfo/UTC"
+# timezone, it should exists in sub folder of /usr/share/zoneinfo
+export TIMEZONE="UTC"
 
 # apt-proxy, ex: http://apt.tsaikd.org:9999/
 export APT_PROXY=""
