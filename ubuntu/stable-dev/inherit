@@ -1,0 +1,6 @@
+app-editors/vim
+net-misc/curl
+net-misc/wget
+sys-process/psmisc
+dev-vcs/git
+net-misc/openssh

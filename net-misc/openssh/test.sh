@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in vim wget killall git sshd ; do
+for i in sshd ; do
 	echo "Testing command ${i} is valid ..."
 	type "${i}" &>/dev/null || exit 1
 done
