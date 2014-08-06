@@ -2,7 +2,7 @@ FROM DOCKER_BASE/nginx:latest
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/nginx-dev
+ENV DOCKER_SRC
 
 EXPOSE 22
 EXPOSE 80

@@ -2,7 +2,7 @@ FROM DOCKER_BASE/java:jre7
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/elasticsearch-1.2.1
+ENV DOCKER_SRC
 
 EXPOSE 9200
 EXPOSE 9300

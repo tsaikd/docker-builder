@@ -2,7 +2,7 @@ FROM DOCKER_BASE/ubuntu:stable
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/apache2-php5
+ENV DOCKER_SRC
 
 EXPOSE 80
 

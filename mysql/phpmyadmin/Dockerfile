@@ -2,7 +2,7 @@ FROM DOCKER_BASE/mysql:latest
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/mysql-phpmyadmin
+ENV DOCKER_SRC
 
 EXPOSE 80
 EXPOSE 3306

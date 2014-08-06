@@ -2,7 +2,7 @@ FROM DOCKER_BASE/apache2:php5
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/phpvirtualbox-4.3.1
+ENV DOCKER_SRC
 
 EXPOSE 80
 

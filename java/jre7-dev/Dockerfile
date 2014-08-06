@@ -2,7 +2,7 @@ FROM DOCKER_BASE/java:jre7
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/java-jre7-dev
+ENV DOCKER_SRC
 
 EXPOSE 22
 

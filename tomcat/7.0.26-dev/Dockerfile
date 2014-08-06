@@ -2,7 +2,7 @@ FROM DOCKER_BASE/tomcat:7.0.26
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/tomcat-7.0.26-dev
+ENV DOCKER_SRC
 
 EXPOSE 22
 EXPOSE 8080

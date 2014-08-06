@@ -2,7 +2,7 @@ FROM DOCKER_BASE/ubuntu:stable
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu-apt-cacher-ng
+ENV DOCKER_SRC
 
 EXPOSE 3142
 

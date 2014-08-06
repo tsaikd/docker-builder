@@ -2,7 +2,7 @@ FROM DOCKER_BASE/ubuntu:stable
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/java-jdk7
+ENV DOCKER_SRC
 
 ADD . $DOCKER_SRC
 

@@ -2,7 +2,7 @@ FROM DOCKER_BASE/solr:4.7.0
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/solr-4.7.0-dev
+ENV DOCKER_SRC
 
 EXPOSE 22
 EXPOSE 8983

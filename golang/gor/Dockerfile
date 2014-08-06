@@ -2,7 +2,7 @@ FROM DOCKER_BASE/golang:1.2
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/golang-gor
+ENV DOCKER_SRC
 
 ADD . $DOCKER_SRC
 

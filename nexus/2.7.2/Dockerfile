@@ -2,7 +2,7 @@ FROM DOCKER_BASE/tomcat:7
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/nexus-2.7.2
+ENV DOCKER_SRC
 
 EXPOSE 8080
 

@@ -2,7 +2,7 @@ FROM DOCKER_BASE/ubuntu:12.04
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu-12.04-dev
+ENV DOCKER_SRC
 
 EXPOSE 22
 

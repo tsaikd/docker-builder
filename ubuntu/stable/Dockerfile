@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
-ENV DOCKER_SRC /opt/docker/DOCKER_BASE/ubuntu-stable
+ENV DOCKER_SRC
 
 ADD . $DOCKER_SRC
 

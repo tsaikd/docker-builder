@@ -168,6 +168,7 @@ function build() {
 		rm -rf "${PD}/tmp/${imgname}/${tag}" || exit $?
 		mkdir -p "${PD}/tmp/${imgname}/${tag}" || exit $?
 		cp -aL "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
+		sed -i "s/^ENV DOCKER_SRC$/ENV DOCKER_SRC \/opt\/docker\/DOCKER_BASE\/${imgname}\-${tag}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
 		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
 
 		# change to tmp directory
