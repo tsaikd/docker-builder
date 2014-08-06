@@ -133,7 +133,22 @@ function build() {
 	local auto_apt_get
 	local dev_mode
 	local inherit
+	local fakedev
 	for tag in "$@" ; do
+		if [ "${tag:${#tag}-4}" == "-dev" ] && [ ! -d "${PD}/${imgname}/${tag}" ] ; then
+			fakedev="true"
+			parent_tag="${tag:0:${#tag}-4}"
+			mkdir -p "${PD}/${imgname}/${tag}" || exit $?
+			cp -a "${PD}/${imgname}/${parent_tag}/Dockerfile" "${PD}/${imgname}/${tag}/Dockerfile" || exit $?
+			sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "${PD}/${imgname}/${tag}/Dockerfile" || exit $?
+			if [ -z "$(grep "^EXPOSE 22$" "${PD}/${imgname}/${tag}/Dockerfile")" ] ; then
+				echo "EXPOSE 22" >> "${PD}/${imgname}/${tag}/Dockerfile"
+			fi
+			cp -a "${PD}/ubuntu/stable-dev/inherit" "${PD}/${imgname}/${tag}/inherit" || exit $?
+		else
+			fakedev=""
+		fi
+
 		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
 
 		# check parent image exists
@@ -240,9 +255,6 @@ function build() {
 		if [ "${auto_apt_get}" ] ; then
 			echo 'apt-get -q update || exit $?' >> build-all.sh
 		fi
-		if [ "${dev_mode}" ] ; then
-			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
-		fi
 		while read inherit ; do
 			[ -z "${inherit}" ] && continue
 			[ "${inherit:0:1}" == "#" ] && continue
@@ -253,6 +265,9 @@ function build() {
 			cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
 		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
 		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
+		if [ "${dev_mode}" ] ; then
+			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
+		fi
 		if [ "${auto_apt_get}" ] ; then
 			echo 'apt-get -q clean || exit $?' >> build-all.sh
 		fi
@@ -307,6 +322,9 @@ function build() {
 		${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
 
 		popd >/dev/null || exit $?
+
+		# clean fakedev tmp folder
+		[ "${fakedev}" ] && rm -rf "${PD}/${imgname}/${tag}"
 	done
 }
 
