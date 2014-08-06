@@ -38,10 +38,16 @@ EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
 }
 
+if [ "$(id -u)" -gt 0 ] ; then
+	sudo="sudo"
+else
+	sudo=""
+fi
+
 if hash docker 2>/dev/null ; then
-	docker="docker"
+	docker="${sudo} docker"
 elif hash docker.io 2>/dev/null ; then
-	docker="docker.io"
+	docker="${sudo} docker.io"
 else
 	echo "docker command not found"
 	exit 1
