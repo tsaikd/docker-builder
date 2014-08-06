@@ -6,7 +6,5 @@ if [ "$redist" != "precise" ] ; then
 	sed -i "s/precise/$redist/g" /etc/apt/sources.list.d/nginx.list
 fi
 
-apt-get -q update || exit $?
 apt-get -q -y --force-yes install nginx || exit $?
-apt-get -q clean || exit $?
 

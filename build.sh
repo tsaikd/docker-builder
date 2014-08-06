@@ -130,6 +130,8 @@ function build() {
 	local url
 	local parent_imgname
 	local parent_tag
+	local auto_apt_get
+	local dev_mode
 	for tag in "$@" ; do
 		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
 
@@ -181,6 +183,21 @@ function build() {
 		done
 		chmod 600 root/root/.ssh/authorized_keys || exit $?
 
+		# check necessary to auto apt-get update and clean
+		if [ "$(cat_one_file "${PD}/${imgname}/${tag}/build.sh" | grep "^apt-get ")" ] ; then
+			auto_apt_get="true"
+		else
+			auto_apt_get=""
+		fi
+
+		# check dev suffix
+		if [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+			dev_mode="true"
+			auto_apt_get="true"
+		else
+			dev_mode=""
+		fi
+
 		# generate build-all.sh
 		> build-all.sh
 		cat_one_file "${PD}/config.sh.sample" >> build-all.sh
@@ -188,14 +205,16 @@ function build() {
 		cat_one_file "${PD}/${imgname}/config.sh" >> build-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> build-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
-		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
-			true
-		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
-			true
-		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		if [ "${auto_apt_get}" ] ; then
+			echo 'apt-get -q update || exit $?' >> build-all.sh
+		fi
+		if [ "${dev_mode}" ] ; then
 			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
 		fi
 		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
+		if [ "${auto_apt_get}" ] ; then
+			echo 'apt-get -q clean || exit $?' >> build-all.sh
+		fi
 		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
 
 		# generate test-all.sh
@@ -205,11 +224,7 @@ function build() {
 		cat_one_file "${PD}/${imgname}/config.sh" >> test-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> test-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
-		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
-			true
-		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
-			true
-		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		if [ "${dev_mode}" ] ; then
 			cat_one_file "${PD}/${imgname}/${tag}/test.sh" "${PD}/ubuntu/stable-dev/test.sh" >> test-all.sh
 		fi
 		cat_parent_docker_file "test.sh" >> test-all.sh
@@ -223,11 +238,7 @@ function build() {
 		cat_one_file "${PD}/${imgname}/config.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
-		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
-			true
-		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
-			true
-		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		if [ "${dev_mode}" ] ; then
 			cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
 		fi
 		cat_parent_docker_file "start.sh" >> start-all.sh

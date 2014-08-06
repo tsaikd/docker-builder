@@ -1,8 +1,6 @@
 #!/bin/bash
 
-apt-get -q update || exit $?
 apt-get -q -y install p7zip-full || exit $?
-apt-get -q clean || exit $?
 
 # phpvirtualbox 4.3-1 tarball http://sourceforge.net/projects/phpvirtualbox/files/phpvirtualbox-4.3-1.zip/download
 cd /tmp || exit $?

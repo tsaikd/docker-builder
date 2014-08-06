@@ -6,9 +6,7 @@ debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password ${MYSQ
 debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password ${MYSQL_ROOT_PASSWD}"
 debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password ${MYSQL_ROOT_PASSWD}"
 
-apt-get -q update || exit $?
 apt-get -q -y install phpmyadmin || exit $?
-apt-get -q clean || exit $?
 
 confpath="/etc/apache2/sites-enabled/000-default"
 line="$(sed -n "/Directory \/var\/www\//=" "${confpath}")"
