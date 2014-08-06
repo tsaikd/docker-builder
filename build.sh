@@ -90,8 +90,8 @@ function cat_one_file() {
 	local f
 	for f in "$@" ; do
 		if [ -f "${f}" ] ; then
-			if [ "${f:0:${#PD}}" == "${PWD}" ] ; then
-				echo "# ${f:${#PWD}+1}"
+			if [ "${f:0:${#PD}}" == "${PD}" ] ; then
+				echo "# ${f:${#PD}+1}"
 			else
 				echo "# ${f}"
 			fi
@@ -132,6 +132,7 @@ function build() {
 	local parent_tag
 	local auto_apt_get
 	local dev_mode
+	local inherit
 	for tag in "$@" ; do
 		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
 
@@ -183,15 +184,46 @@ function build() {
 		done
 		chmod 600 root/root/.ssh/authorized_keys || exit $?
 
+		# copy inherit root file
+		while read inherit ; do
+			[ -z "${inherit}" ] && continue
+			[ "${inherit:0:1}" == "#" ] && continue
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			if [ -d "${PD}/${inherit}/root" ] ; then
+				cp -aL "${PD}/${inherit}/root" ./ || exit $?
+			fi
+		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
+
 		# check necessary to auto apt-get update and clean
 		if [ "$(cat_one_file "${PD}/${imgname}/${tag}/build.sh" | grep "^apt-get ")" ] ; then
 			auto_apt_get="true"
 		else
 			auto_apt_get=""
 		fi
+		if [ -z "${auto_apt_get}" ] ; then
+			while read inherit ; do
+				[ -z "${inherit}" ] && continue
+				[ "${inherit:0:1}" == "#" ] && continue
+				if [ ! -d "${PD}/${inherit}" ] ; then
+					echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
+					exit 1
+				fi
+				if [ "$(cat_one_file "${PD}/${inherit}/build.sh" | grep "^apt-get ")" ] ; then
+					auto_apt_get="true"
+					break
+				fi
+			done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
+		fi
 
 		# check dev suffix
-		if [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
+			dev_mode=""
+		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
+			dev_mode=""
+		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
 			dev_mode="true"
 			auto_apt_get="true"
 		else
@@ -211,6 +243,15 @@ function build() {
 		if [ "${dev_mode}" ] ; then
 			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
 		fi
+		while read inherit ; do
+			[ -z "${inherit}" ] && continue
+			[ "${inherit:0:1}" == "#" ] && continue
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
+		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
 		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
 		if [ "${auto_apt_get}" ] ; then
 			echo 'apt-get -q clean || exit $?' >> build-all.sh
@@ -228,6 +269,15 @@ function build() {
 			cat_one_file "${PD}/${imgname}/${tag}/test.sh" "${PD}/ubuntu/stable-dev/test.sh" >> test-all.sh
 		fi
 		cat_parent_docker_file "test.sh" >> test-all.sh
+		while read inherit ; do
+			[ -z "${inherit}" ] && continue
+			[ "${inherit:0:1}" == "#" ] && continue
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
+		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
 		cat_one_file "${PD}/${imgname}/${tag}/test.sh" >> test-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/test-post.sh" "${PD}/ubuntu/stable/test-post.sh" >> test-all.sh
 
@@ -242,6 +292,15 @@ function build() {
 			cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
 		fi
 		cat_parent_docker_file "start.sh" >> start-all.sh
+		while read inherit ; do
+			[ -z "${inherit}" ] && continue
+			[ "${inherit:0:1}" == "#" ] && continue
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
+		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
 		cat_one_file "${PD}/${imgname}/${tag}/start.sh" >> start-all.sh
 		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/stable/start-post.sh" >> start-all.sh
 

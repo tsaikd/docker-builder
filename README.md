@@ -55,6 +55,7 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
 		* Build image script (build.sh)
 		* Default start CMD (start.sh)
 		* Default test CMD (test.sh)
+		* Inherit other images (inherit)
 		* Download file list (download)
 		* SHA1 hash checksum file (sha1sum)
 		* Build time custom root filesystem (root)
