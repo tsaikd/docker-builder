@@ -6,32 +6,12 @@ PD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${PD}/config.sh.sample" || exit $?
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
 
-# package list with order, first tag is default
-pkglist="$(cat <<EOF
-  * ubuntu            stable satble-dev 12.04  12.04-dev  apt-cacher-ng apt-cacher-ng-dev
-  +-- squid3          latest
-  +-- java            jre7   jre7-dev   jdk7   jdk7-dev   jdk6
-    +-- tomcat        7      7-dev      7.0.52 7.0.52-dev
-      +-- nexus       2.7.2  2.7.2-dev
-    +-- solr          4.7.0  4.7.0-dev  4.6.0  4.6.0-dev
-  +-- apache2         php5   php5-dev
-    +-- phpvirtualbox 4.3.1  4.3.1-dev
-  +-- nginx           latest dev        ppa    ppa-dev
-  +-- golang          1.2    1.2-dev    gor    gor-dev
-  +-- mysql           latest phpmyadmin dev
-  +-- nodejs          ppa    ppa-dev
-EOF
-)"
-
 function usage() {
 	cat <<EOF
 Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
   -h       : show this help message
   -r       : rebuild all existed images
-
-Images: (default: build all images)
-${pkglist}
 
 Image:Tag, ex: ubuntu:stable, ex: ubuntu/stable, ex: ubuntu/stable/
 EOF
@@ -102,10 +82,12 @@ function cat_one_file() {
 }
 
 function cat_parent_docker_file() {
-	local parent_docker="${PD}/$(sed -n 's/^FROM [^/]\+\///p' Dockerfile | sed 's/:/\//')"
+	local parent_buildpath="$(sed -n "s/^FROM ${DOCKER_BASE}\\///p" Dockerfile | sed 's/[\.:]/\//g')"
+	local parent_docker="${PD}/${parent_buildpath}"
 	local curdir="${PWD}"
 	local f
 
+	[ -z "${parent_buildpath}" ] && return
 	[ ! -d "${parent_docker}" ] && return
 	[ "${parent_docker%%/}" == "${PD%%/}" ] && return
 
@@ -123,43 +105,51 @@ function cat_parent_docker_file() {
 }
 
 function build() {
-	local imgname="${1}" && shift
-	local tag
+	local buildpath="${1%%/}"
+	local imgpath="${buildpath%/*}"
+	local fullimgtag="$(echo "${buildpath}" | sed -r 's/\/([^/]*?)$/:\1/' | sed 's/\//./g')"
+	local imgname="${fullimgtag%:*}"
+	local tag="${fullimgtag##*:}"
 	local line
 	local filename
 	local url
+	local parent_imgpath
 	local parent_imgname
 	local parent_tag
 	local auto_apt_get
 	local dev_mode
 	local inherit
-	local fakedev
-	for tag in "$@" ; do
-		if [ "${tag:${#tag}-4}" == "-dev" ] && [ ! -d "${PD}/${imgname}/${tag}" ] ; then
-			fakedev="true"
-			parent_tag="${tag:0:${#tag}-4}"
-			mkdir -p "${PD}/${imgname}/${tag}" || exit $?
-			cp -a "${PD}/${imgname}/${parent_tag}/Dockerfile" "${PD}/${imgname}/${tag}/Dockerfile" || exit $?
-			sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "${PD}/${imgname}/${tag}/Dockerfile" || exit $?
-			if [ -z "$(grep "^EXPOSE 22$" "${PD}/${imgname}/${tag}/Dockerfile")" ] ; then
-				echo "EXPOSE 22" >> "${PD}/${imgname}/${tag}/Dockerfile"
-			fi
-			cp -a "${PD}/ubuntu/stable-dev/inherit" "${PD}/${imgname}/${tag}/inherit" || exit $?
+
+	if ( [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ) && [ ! -d "${PD}/${buildpath}" ] ; then
+		if [ "${tag}" == "dev" ] ; then
+			parent_tag="latest"
 		else
-			fakedev=""
+			parent_tag="${tag:0:${#tag}-4}"
 		fi
 
-		pushd "${PD}/${imgname}/${tag}" >/dev/null || exit $?
+		if [ ! -f "${PD}/${imgpath}/${parent_tag}/Dockerfile" ] ; then
+			echo "${buildpath} is invalid package" >&2
+			exit 1
+		fi
 
-		# check parent image exists
-		line="$(sed -n 's/^FROM\s\+DOCKER_BASE\///p' Dockerfile)"
-		if [ "${line}" ] ; then
-			parent_imgname="$(cut -d: -f1 <<<"${line}")"
-			parent_tag="$(cut -d: -f2 <<<"${line}")"
-			parent_tag="${parent_tag:-latest}"
-			if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
-				build "${parent_imgname}" "${parent_tag}" || exit $?
-			fi
+		# reset tmp directory
+		rm -rf "${PD}/tmp/${buildpath}" || exit $?
+		mkdir -p "${PD}/tmp/${buildpath}" || exit $?
+
+		pushd "${PD}/tmp/${buildpath}" >/dev/null || exit $?
+		cp -a "${PD}/${imgpath}/${parent_tag}/Dockerfile" "./" || exit $?
+		sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "Dockerfile" || exit $?
+		if [ -z "$(grep "^EXPOSE 22$" "Dockerfile")" ] ; then
+			echo "EXPOSE 22" >> "Dockerfile"
+		fi
+		cp -a "${PD}/ubuntu/stable-dev/inherit" "inherit" || exit $?
+		popd >/dev/null || exit $?
+	else
+		pushd "${PD}/${buildpath}" >/dev/null || exit $?
+
+		if [ ! -f "Dockerfile" ] ; then
+			echo "${buildpath} is invalid package" >&2
+			exit 1
 		fi
 
 		# download if need
@@ -180,194 +170,212 @@ function build() {
 		if [ -f md5sum ] ; then
 			md5sum -c md5sum || exit $?
 		fi
+
 		popd >/dev/null || exit $?
 
 		# reset tmp directory
-		rm -rf "${PD}/tmp/${imgname}/${tag}" || exit $?
-		mkdir -p "${PD}/tmp/${imgname}/${tag}" || exit $?
-		cp -aL "${PD}/${imgname}/${tag}" "${PD}/tmp/${imgname}/" || exit $?
-		sed -i "s/^ENV DOCKER_SRC$/ENV DOCKER_SRC \/opt\/docker\/DOCKER_BASE\/${imgname}\-${tag}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
-		sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "${PD}/tmp/${imgname}/${tag}/Dockerfile" || exit $?
+		rm -rf "${PD}/tmp/${buildpath}" || exit $?
+		mkdir -p "${PD}/tmp/${buildpath}" || exit $?
+		cp -aL "${PD}/${buildpath}" "${PD}/tmp/${imgpath}/" || exit $?
+	fi
 
-		# change to tmp directory
-		pushd "${PD}/tmp/${imgname}/${tag}" >/dev/null || exit $?
+	# change to tmp directory
+	pushd "${PD}/tmp/${buildpath}" >/dev/null || exit $?
 
-		# generate root ssh key file
-		mkdir -p "root/root/.ssh" || exit $?
-		for filename in ${ROOT_PUBKEY} ; do
-			cat "${filename}" >> root/root/.ssh/authorized_keys || exit $?
-		done
-		chmod 600 root/root/.ssh/authorized_keys || exit $?
-
-		# copy inherit root file
-		while read inherit ; do
-			[ -z "${inherit}" ] && continue
-			[ "${inherit:0:1}" == "#" ] && continue
-			if [ ! -d "${PD}/${inherit}" ] ; then
-				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
-				exit 1
-			fi
-			if [ -d "${PD}/${inherit}/root" ] ; then
-				cp -aL "${PD}/${inherit}/root" ./ || exit $?
-			fi
-		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
-
-		# check necessary to auto apt-get update and clean
-		if [ "$(cat_one_file "${PD}/${imgname}/${tag}/build.sh" | grep "^apt-get ")" ] ; then
-			auto_apt_get="true"
-		else
-			auto_apt_get=""
+	# init Dockerfile part 1
+	line="$(sed -n '/^FROM DOCKER_BASE\//p' "Dockerfile")"
+	if [ "${line}" ] ; then
+		if [ -z "$(grep ":" <<<"${line}")" ] ; then
+			line="$(echo "${line}" | sed -r 's/\/([^/]*?)$/:\1/' | sed 's/\//./g' | sed 's/^FROM DOCKER_BASE\./FROM DOCKER_BASE\//')"
+			sed -i "/^FROM DOCKER_BASE/c \\${line}" "Dockerfile"
 		fi
-		if [ -z "${auto_apt_get}" ] ; then
-			while read inherit ; do
-				[ -z "${inherit}" ] && continue
-				[ "${inherit:0:1}" == "#" ] && continue
-				if [ ! -d "${PD}/${inherit}" ] ; then
-					echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
-					exit 1
-				fi
-				if [ "$(cat_one_file "${PD}/${inherit}/build.sh" | grep "^apt-get ")" ] ; then
-					auto_apt_get="true"
-					break
-				fi
-			done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
-		fi
+	fi
 
-		# check dev suffix
-		if [ "${imgname}:${tag}" == "ubuntu:12.04-dev" ] ; then
-			dev_mode=""
-		elif [ "${imgname}:${tag}" == "ubuntu:stable-dev" ] ; then
-			dev_mode=""
-		elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
-			dev_mode="true"
-			auto_apt_get="true"
-		else
-			dev_mode=""
+	# check parent image exists
+	line="$(sed -n 's/^FROM DOCKER_BASE\///p' Dockerfile)"
+	if [ "${line}" ] ; then
+		parent_imgname="$(cut -d: -f1 <<<"${line}")"
+		parent_imgpath="$(echo "${parent_imgname}" | sed 's/\./\//g')"
+		parent_tag="$(cut -d: -f2 <<<"${line}")"
+		parent_tag="${parent_tag:-latest}"
+		if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
+			build "${parent_imgpath}/${parent_tag}" || exit $?
 		fi
+	fi
 
-		# generate build-all.sh
-		> build-all.sh
-		cat_one_file "${PD}/config.sh.sample" >> build-all.sh
-		cat_one_file "${PD}/config.sh" >> build-all.sh
-		cat_one_file "${PD}/${imgname}/config.sh" >> build-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> build-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
-		if [ "${auto_apt_get}" ] ; then
-			echo 'apt-get -q update || exit $?' >> build-all.sh
-		fi
-		while read inherit ; do
-			[ -z "${inherit}" ] && continue
-			[ "${inherit:0:1}" == "#" ] && continue
-			if [ ! -d "${PD}/${inherit}" ] ; then
-				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
-				exit 1
-			fi
-			cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
-		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
-		cat_one_file "${PD}/${imgname}/${tag}/build.sh" >> build-all.sh
-		if [ "${dev_mode}" ] ; then
-			cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
-		fi
-		if [ "${auto_apt_get}" ] ; then
-			echo 'apt-get -q clean || exit $?' >> build-all.sh
-		fi
-		cat_one_file "${PD}/${imgname}/${tag}/build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
+	# init Dockerfile part 2
+	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile" || exit $?
+	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile" || exit $?
 
-		# generate test-all.sh
-		> test-all.sh
-		cat_one_file "${PD}/config.sh.sample" >> test-all.sh
-		cat_one_file "${PD}/config.sh" >> test-all.sh
-		cat_one_file "${PD}/${imgname}/config.sh" >> test-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> test-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
-		if [ "${dev_mode}" ] ; then
-			cat_one_file "${PD}/${imgname}/${tag}/test.sh" "${PD}/ubuntu/stable-dev/test.sh" >> test-all.sh
-		fi
-		cat_parent_docker_file "test.sh" >> test-all.sh
-		while read inherit ; do
-			[ -z "${inherit}" ] && continue
-			[ "${inherit:0:1}" == "#" ] && continue
-			if [ ! -d "${PD}/${inherit}" ] ; then
-				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
-				exit 1
-			fi
-			cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
-		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
-		cat_one_file "${PD}/${imgname}/${tag}/test.sh" >> test-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/test-post.sh" "${PD}/ubuntu/stable/test-post.sh" >> test-all.sh
-
-		# generate start-all.sh
-		> start-all.sh
-		cat_one_file "${PD}/config.sh.sample" >> start-all.sh
-		cat_one_file "${PD}/config.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/config.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/config.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
-		if [ "${dev_mode}" ] ; then
-			cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
-		fi
-		cat_parent_docker_file "start.sh" >> start-all.sh
-		while read inherit ; do
-			[ -z "${inherit}" ] && continue
-			[ "${inherit:0:1}" == "#" ] && continue
-			if [ ! -d "${PD}/${inherit}" ] ; then
-				echo "${imgname}/${tag} find invalid inherit: ${inherit}" >&2
-				exit 1
-			fi
-			cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
-		done <<<"$(cat_one_file "${PD}/${imgname}/${tag}/inherit")"
-		cat_one_file "${PD}/${imgname}/${tag}/start.sh" >> start-all.sh
-		cat_one_file "${PD}/${imgname}/${tag}/start-post.sh" "${PD}/ubuntu/stable/start-post.sh" >> start-all.sh
-
-		${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
-
-		popd >/dev/null || exit $?
-
-		# clean fakedev tmp folder
-		[ "${fakedev}" ] && rm -rf "${PD}/${imgname}/${tag}"
+	# generate root ssh key file
+	mkdir -p "root/root/.ssh" || exit $?
+	for filename in ${ROOT_PUBKEY} ; do
+		cat "${filename}" >> root/root/.ssh/authorized_keys || exit $?
 	done
+	chmod 600 root/root/.ssh/authorized_keys || exit $?
+
+	# copy inherit root file
+	while read inherit ; do
+		[ -z "${inherit}" ] && continue
+		[ "${inherit:0:1}" == "#" ] && continue
+		if [ ! -d "${PD}/${inherit}" ] ; then
+			echo "${buildpath} find invalid inherit: ${inherit}" >&2
+			exit 1
+		fi
+		if [ -d "${PD}/${inherit}/root" ] ; then
+			cp -aL "${PD}/${inherit}/root" ./ || exit $?
+		fi
+	done <<<"$(cat_one_file "inherit")"
+
+	# check necessary to auto apt-get update and clean
+	if [ "$(cat_one_file "build.sh" | grep "^apt-get ")" ] ; then
+		auto_apt_get="true"
+	else
+		auto_apt_get=""
+	fi
+	if [ -z "${auto_apt_get}" ] ; then
+		while read inherit ; do
+			[ -z "${inherit}" ] && continue
+			[ "${inherit:0:1}" == "#" ] && continue
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${buildpath} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			if [ "$(cat_one_file "${PD}/${inherit}/build.sh" | grep "^apt-get ")" ] ; then
+				auto_apt_get="true"
+				break
+			fi
+		done <<<"$(cat_one_file "inherit")"
+	fi
+
+	# check dev suffix
+	if [ "${buildpath}" == "ubuntu/12.04-dev" ] ; then
+		dev_mode=""
+	elif [ "${buildpath}" == "ubuntu/stable-dev" ] ; then
+		dev_mode=""
+	elif [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ; then
+		dev_mode="true"
+		auto_apt_get="true"
+	else
+		dev_mode=""
+	fi
+
+	# generate build-all.sh
+	> build-all.sh
+	cat_one_file "${PD}/config.sh.sample" >> build-all.sh
+	cat_one_file "${PD}/config.sh" >> build-all.sh
+	cat_one_file "config.sh" >> build-all.sh
+	cat_one_file "build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
+	if [ "${auto_apt_get}" ] ; then
+		echo '# auto_apt_get' >> build-all.sh
+		echo 'apt-get -q update || exit $?' >> build-all.sh
+	fi
+	while read inherit ; do
+		[ -z "${inherit}" ] && continue
+		[ "${inherit:0:1}" == "#" ] && continue
+		if [ ! -d "${PD}/${inherit}" ] ; then
+			echo "${buildpath} find invalid inherit: ${inherit}" >&2
+			exit 1
+		fi
+		cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
+	done <<<"$(cat_one_file "inherit")"
+	cat_one_file "build.sh" >> build-all.sh
+	if [ "${dev_mode}" ] ; then
+		cat_one_file "${PD}/ubuntu/stable-dev/build.sh" >> build-all.sh
+	fi
+	if [ "${auto_apt_get}" ] ; then
+		echo '# auto_apt_get' >> build-all.sh
+		echo 'apt-get -q clean || exit $?' >> build-all.sh
+	fi
+	cat_one_file "build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
+
+	# generate test-all.sh
+	> test-all.sh
+	cat_one_file "${PD}/config.sh.sample" >> test-all.sh
+	cat_one_file "${PD}/config.sh" >> test-all.sh
+	cat_one_file "config.sh" >> test-all.sh
+	cat_one_file "test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
+	cat_parent_docker_file "test.sh" >> test-all.sh
+	while read inherit ; do
+		[ -z "${inherit}" ] && continue
+		[ "${inherit:0:1}" == "#" ] && continue
+		if [ ! -d "${PD}/${inherit}" ] ; then
+			echo "${buildpath} find invalid inherit: ${inherit}" >&2
+			exit 1
+		fi
+		cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
+	done <<<"$(cat_one_file "inherit")"
+	cat_one_file "test.sh" >> test-all.sh
+	if [ "${dev_mode}" ] ; then
+		cat_one_file "test.sh" "${PD}/ubuntu/stable-dev/test.sh" >> test-all.sh
+	fi
+	cat_one_file "test-post.sh" "${PD}/ubuntu/stable/test-post.sh" >> test-all.sh
+
+	# generate start-all.sh
+	> start-all.sh
+	cat_one_file "${PD}/config.sh.sample" >> start-all.sh
+	cat_one_file "${PD}/config.sh" >> start-all.sh
+	cat_one_file "config.sh" >> start-all.sh
+	cat_one_file "start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
+	cat_parent_docker_file "start.sh" >> start-all.sh
+	while read inherit ; do
+		[ -z "${inherit}" ] && continue
+		[ "${inherit:0:1}" == "#" ] && continue
+		if [ ! -d "${PD}/${inherit}" ] ; then
+			echo "${buildpath} find invalid inherit: ${inherit}" >&2
+			exit 1
+		fi
+		cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
+	done <<<"$(cat_one_file "inherit")"
+	cat_one_file "start.sh" >> start-all.sh
+	if [ "${dev_mode}" ] ; then
+		cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
+	fi
+	cat_one_file "start-post.sh" "${PD}/ubuntu/stable/start-post.sh" >> start-all.sh
+
+	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
+
+	popd >/dev/null || exit $?
 }
 
 function rebuild() {
 	echo "Collecting current images info ..."
-	local images="$(${docker} images | sed '1d' | awk '/^'"${DOCKER_BASE}"'\//{print $1"/"$2}' | cut -d/ -f2-)"
-	local pkgline
-	local pkgname
-	local pkgtag
-	local num
+	local images="$(${docker} images | sed "1d;s/\./\\//g" | awk '/^'"${DOCKER_BASE}"'\//{print $1"/"$2}' | cut -d/ -f2-)"
+	local imagesnum="$(wc -l <<<"${images}")"
+	local buildpath
+	local tailpath
+	local parent_imgpath
 	local i
 
-	while read pkgline ; do
-		pkgline="$(sed 's/^[*+-]*\s*//' <<<"${pkgline}")"
-		num="$(awk '{print NF}' <<<"${pkgline}")"
-		pkgname="$(awk '{print $1}' <<<"${pkgline}")"
-		for ((i=2 ; i<=num ; i++)) ; do
-			pkgtag="$(awk '{print $'"${i}"'}' <<<"${pkgline}")"
-			if [ "$(grep "^${pkgname}/${pkgtag}\$" <<<"${images}")" ] ; then
-				build "${pkgname}" "${pkgtag}"
+	pushd "${PD}" >/dev/null || exit $?
+	for ((i=imagesnum ; i>=1 ; i--)) ; do
+		buildpath="$(sed -n "${i}p" <<<"${images}")"
+		if [ ! -d "${buildpath}" ] ; then
+			tailpath="${buildpath:${#buildpath}-4}"
+			if [ "${tailpath}" != "-dev" ] && [ "${tailpath}" != "/dev" ] ; then
+				continue
 			fi
-		done
-	done <<<"${pkglist}"
+			if [ "${tailpath}" == "-dev" ] ; then
+				parent_imgpath="${buildpath:0:-4}"
+			elif [ "${tailpath}" == "/dev" ]; then
+				parent_imgpath="${buildpath:0:-4}/latest"
+			else
+				continue
+			fi
+			if [ ! -d "${parent_imgpath}" ] ; then
+				continue
+			fi
+		fi
+		build "${buildpath}" || exit $?
+	done
+	popd >/dev/null || exit $?
 }
 
 if [ "${FLAG_REBUILD}" == "1" ] ; then
 	rebuild
-elif [ $# -eq 0 ] ; then
-	while read i ; do
-		image="$(awk '{print $1}' <<<"${i}")"
-		tag="$(awk '{print $2}' <<<"${i}")"
-		build "${image}" "${tag}"
-	done <<<"$(sed 's/^[-+* ]*//g' <<<"${pkglist}")"
 else
 	for i in "$@" ; do
-		i="${i%%/}"
-		i="$(sed 's/\//:/g' <<<"${i}")"
-		if [ "${i##*:}" == "${i}" ] ; then
-			tag="$(sed 's/^[-+* ]*//g' <<<"${pkglist}" | grep "^${i}" | awk '{print $2}')"
-			build "${i}" "${tag}"
-		else
-			build "${i%:*}" "${i##*:}"
-		fi
+		build "${i}"
 	done
 fi
 

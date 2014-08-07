@@ -1,6 +1,6 @@
-app-editors/vim
-net-misc/curl
-net-misc/wget
-sys-process/psmisc
-dev-vcs/git
-net-misc/openssh
+app-editors/vim/latest
+net-misc/curl/latest
+net-misc/wget/latest
+sys-process/psmisc/latest
+dev-vcs/git/latest
+net-misc/openssh/latest
