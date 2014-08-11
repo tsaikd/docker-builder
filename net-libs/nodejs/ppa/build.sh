@@ -9,3 +9,5 @@ EOF
 
 apt-get -q -y --force-yes install nodejs npm || exit $?
 
+ln -s /usr/bin/nodejs /usr/local/bin/node || exit $?
+
