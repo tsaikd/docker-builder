@@ -1,4 +1,8 @@
 #!/bin/bash
 
-apt-get -q -y install subversion || exit $?
+if ! type svn &>/dev/null ; then
+	apt-get -q -y install subversion || exit $?
+fi
+
+true
 

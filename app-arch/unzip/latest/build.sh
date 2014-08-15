@@ -1,4 +1,7 @@
 #!/bin/bash
 
-apt-get -q -y install unzip || exit $?
+if ! type unzip &>/dev/null ; then
+	apt-get -q -y install unzip || exit $?
+fi
 
+true

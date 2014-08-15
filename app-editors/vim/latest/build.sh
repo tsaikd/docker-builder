@@ -1,4 +1,6 @@
 #!/bin/bash
 
-apt-get -q -y install vim || exit $?
+if ! type vim &>/dev/null ; then
+	apt-get -q -y install vim || exit $?
+fi
 

@@ -1,4 +1,8 @@
 #!/bin/bash
 
-apt-get -q -y install mercurial || exit $?
+if ! type hg &>/dev/null ; then
+	apt-get -q -y install mercurial || exit $?
+fi
+
+true
 

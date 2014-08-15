@@ -2,6 +2,11 @@
 
 maxtime="$(( $(date +%s) + 60 ))"
 
+for i in squid3 ; do
+	echo "Testing command ${i} is valid ..."
+	type "${i}" &>/dev/null || exit 1
+done
+
 for i in 3128 ; do
 	echo "Testing port ${i} is opened ..."
 	while [ -z "$(netstat -tln | grep "${i} ")" ] ; do

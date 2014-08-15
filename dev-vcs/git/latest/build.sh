@@ -1,4 +1,8 @@
 #!/bin/bash
 
-apt-get -q -y install git || exit $?
+if ! type git &>/dev/null ; then
+	apt-get -q -y install git || exit $?
+fi
+
+true
 

@@ -1,4 +1,8 @@
 #!/bin/bash
 
-apt-get -q -y install curl || exit $?
+if ! type curl &>/dev/null ; then
+	apt-get -q -y install curl || exit $?
+fi
+
+true
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in php ; do
+for i in php php5 ; do
 	echo "Testing command ${i} is valid ..."
 	type "${i}" &>/dev/null || exit 1
 done

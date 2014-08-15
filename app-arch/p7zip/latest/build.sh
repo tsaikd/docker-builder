@@ -1,4 +1,7 @@
 #!/bin/bash
 
-apt-get -q -y install p7zip-full || exit $?
+if ! type 7z &>/dev/null ; then
+	apt-get -q -y install p7zip-full || exit $?
+fi
 
+true
