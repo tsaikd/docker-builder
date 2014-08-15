@@ -235,13 +235,7 @@ function build() {
 	fi
 	if [ -z "${auto_apt_get}" ] ; then
 		while read inherit ; do
-			[ -z "${inherit}" ] && continue
-			[ "${inherit:0:1}" == "#" ] && continue
-			if [ ! -d "${PD}/${inherit}" ] ; then
-				echo "${buildpath} find invalid inherit: ${inherit}" >&2
-				exit 1
-			fi
-			if [ "$(cat_one_file "${PD}/${inherit}/build.sh" | grep "^apt-get ")" ] ; then
+			if [ "$(cat_one_file "${PD}/${inherit}/build.sh" | grep "^[[:space:]]*apt-get ")" ] ; then
 				auto_apt_get="true"
 				break
 			fi
