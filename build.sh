@@ -228,7 +228,7 @@ function build() {
 	done <<<"$(cat_one_file "inherit")"
 
 	# check necessary to auto apt-get update and clean
-	if [ "$(cat_one_file "build.sh" | grep "^apt-get ")" ] ; then
+	if [ "$(cat_one_file "build.sh" | grep "^[[:space:]]*apt-get ")" ] ; then
 		auto_apt_get="true"
 	else
 		auto_apt_get=""
