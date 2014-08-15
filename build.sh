@@ -104,6 +104,47 @@ function cat_parent_docker_file() {
 	popd >/dev/null || exit $?
 }
 
+function cat_inherit() {
+	local buildpath="${1%%/}"
+	local inherit
+	if [ -f "${PD}/${buildpath}/inherit" ] ; then
+		while read inherit ; do
+			if [ ! -d "${PD}/${inherit}" ] ; then
+				echo "${buildpath} find invalid inherit: ${inherit}" >&2
+				exit 1
+			fi
+			cat_inherit "${inherit}"
+			echo "${inherit}"
+		done <<<"$(sed -n '/^\s*[^#]/p' "${PD}/${buildpath}/inherit")"
+	fi
+}
+
+function process_download_file() {
+	local folder="${1%%/}"
+	[ "${folder:0:1}" != "/" ] && folder="${PD}/${folder}"
+
+	pushd "${folder}" >/dev/null || exit $?
+	# download if need
+	if [ -s download ] ; then
+		while read line ; do
+			filename="$(awk '{print $1}' <<<"${line}")"
+			url="$(awk '{print $2}' <<<"${line}")"
+			if ! check_copy_file "${filename}" ; then
+				wget -O "${filename}" "${url}"
+			fi
+		done <<<"$(sed -n '/^\s*[^#]/p' "download")"
+	fi
+
+	# checksum if need
+	if [ -s sha1sum ] ; then
+		sha1sum -c sha1sum || exit $?
+	fi
+	if [ -s md5sum ] ; then
+		md5sum -c md5sum || exit $?
+	fi
+	popd >/dev/null || exit $?
+}
+
 function build() {
 	local buildpath="${1%%/}"
 	local imgpath="${buildpath%/*}"
@@ -145,33 +186,12 @@ function build() {
 		cp -a "${PD}/ubuntu/stable-dev/inherit" "inherit" || exit $?
 		popd >/dev/null || exit $?
 	else
-		pushd "${PD}/${buildpath}" >/dev/null || exit $?
-
-		if [ ! -f "Dockerfile" ] ; then
+		if [ ! -f "${PD}/${buildpath}/Dockerfile" ] ; then
 			echo "${buildpath} is invalid package" >&2
 			exit 1
 		fi
 
-		# download if need
-		if [ -f download ] ; then
-			while read line ; do
-				filename="$(awk '{print $1}' <<<"${line}")"
-				url="$(awk '{print $2}' <<<"${line}")"
-				if ! check_copy_file "${filename}" ; then
-					wget -O "${filename}" "${url}"
-				fi
-			done <<<"$(grep -v "^#" download | grep -v "^[[:space:]]*$")"
-		fi
-
-		# checksum if need
-		if [ -f sha1sum ] ; then
-			sha1sum -c sha1sum || exit $?
-		fi
-		if [ -f md5sum ] ; then
-			md5sum -c md5sum || exit $?
-		fi
-
-		popd >/dev/null || exit $?
+		process_download_file "${buildpath}"
 
 		# reset tmp directory
 		rm -rf "${PD}/tmp/${buildpath}" || exit $?
@@ -214,18 +234,26 @@ function build() {
 	done
 	chmod 600 root/root/.ssh/authorized_keys || exit $?
 
-	# copy inherit root file
+	# check inherit of inherit
+	echo "Checking inherit list ..."
+	cat_inherit "${buildpath}" | awk '!a[$0]++' > inherit
+
+	# process inherit function
 	while read inherit ; do
-		[ -z "${inherit}" ] && continue
-		[ "${inherit:0:1}" == "#" ] && continue
-		if [ ! -d "${PD}/${inherit}" ] ; then
-			echo "${buildpath} find invalid inherit: ${inherit}" >&2
-			exit 1
-		fi
+		# process inherit download file
+		cat_one_file "${PD}/${inherit}/download" >> "download"
+		cat_one_file "${PD}/${inherit}/sha1sum" >> "sha1sum"
+		cat_one_file "${PD}/${inherit}/md5sum" >> "md5sum"
+
+		# copy inherit root file
 		if [ -d "${PD}/${inherit}/root" ] ; then
 			cp -aL "${PD}/${inherit}/root" ./ || exit $?
 		fi
 	done <<<"$(cat_one_file "inherit")"
+	sed -i '/^\s*$/d;/^\s*#/d' "download" || exit $?
+	sed -i '/^\s*$/d;/^\s*#/d' "sha1sum" || exit $?
+	sed -i '/^\s*$/d;/^\s*#/d' "md5sum" || exit $?
+	process_download_file "${PD}/tmp/${buildpath}"
 
 	# check necessary to auto apt-get update and clean
 	if [ "$(cat_one_file "build.sh" | grep "^[[:space:]]*apt-get ")" ] ; then
@@ -265,12 +293,6 @@ function build() {
 		echo 'apt-get -q update || exit $?' >> build-all.sh
 	fi
 	while read inherit ; do
-		[ -z "${inherit}" ] && continue
-		[ "${inherit:0:1}" == "#" ] && continue
-		if [ ! -d "${PD}/${inherit}" ] ; then
-			echo "${buildpath} find invalid inherit: ${inherit}" >&2
-			exit 1
-		fi
 		cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
 	done <<<"$(cat_one_file "inherit")"
 	cat_one_file "build.sh" >> build-all.sh
@@ -291,12 +313,6 @@ function build() {
 	cat_one_file "test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
 	cat_parent_docker_file "test.sh" >> test-all.sh
 	while read inherit ; do
-		[ -z "${inherit}" ] && continue
-		[ "${inherit:0:1}" == "#" ] && continue
-		if [ ! -d "${PD}/${inherit}" ] ; then
-			echo "${buildpath} find invalid inherit: ${inherit}" >&2
-			exit 1
-		fi
 		cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
 	done <<<"$(cat_one_file "inherit")"
 	cat_one_file "test.sh" >> test-all.sh
@@ -313,12 +329,6 @@ function build() {
 	cat_one_file "start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
 	cat_parent_docker_file "start.sh" >> start-all.sh
 	while read inherit ; do
-		[ -z "${inherit}" ] && continue
-		[ "${inherit:0:1}" == "#" ] && continue
-		if [ ! -d "${PD}/${inherit}" ] ; then
-			echo "${buildpath} find invalid inherit: ${inherit}" >&2
-			exit 1
-		fi
 		cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
 	done <<<"$(cat_one_file "inherit")"
 	cat_one_file "start.sh" >> start-all.sh
