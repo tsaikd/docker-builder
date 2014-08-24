@@ -2,5 +2,6 @@ app-editors/vim/latest
 net-misc/curl/latest
 net-misc/wget/latest
 sys-process/psmisc/latest
+net-dns/dnsutils/latest
 dev-vcs/git/latest
 net-misc/openssh/latest
