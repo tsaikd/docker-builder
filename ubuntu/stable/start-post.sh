@@ -10,5 +10,3 @@ fi
 
 bash
 
-true
-
