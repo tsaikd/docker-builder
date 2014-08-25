@@ -27,20 +27,23 @@ sudo ./build.sh
 ```
 
 ## Run application example
+
+* [net-dns/dnsmasq/latest](net-dns/dnsmasq/latest)
+
 ```
-docker run -i -t -d -p 80:80 tsaikd/nginx
+docker run -itd -p 80:80 tsaikd/www-servers.nginx:latest
 ```
 
 ```
-docker run -i -t -d -p 8080:8080 tsaikd/tomcat:7
+docker run -i -t -d -p 8080:8080 tsaikd/www-servers.tomcat:7
 ```
 
 ```
-docker run -i -t -d -p 8080:8080 -v /data/webapps:/opt/docker/tsaikd/tomcat-7/custom/var/lib/tomcat7/webapps tsaikd/tomcat:7
+docker run -i -t -d -p 8080:8080 -v /data/webapps:/var/lib/tomcat7/webapps tsaikd/www-servers.tomcat:7
 ```
 
 ```
-docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/solr:4.6.0
+docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/dev-db.solr:4.7.0
 ```
 
 ## More customization
