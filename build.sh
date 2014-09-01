@@ -236,6 +236,7 @@ function build() {
 
 	# check inherit of inherit
 	echo "Checking inherit list ..."
+	cat_inherit "${parent_imgpath}/${parent_tag}" | awk '!a[$0]++' > pinherit
 	cat_inherit "${buildpath}" | awk '!a[$0]++' > inherit
 
 	# process inherit function
@@ -314,6 +315,9 @@ function build() {
 	cat_parent_docker_file "test.sh" >> test-all.sh
 	while read inherit ; do
 		cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
+	done <<<"$(cat_one_file "pinherit")"
+	while read inherit ; do
+		cat_one_file "${PD}/${inherit}/test.sh" >> test-all.sh
 	done <<<"$(cat_one_file "inherit")"
 	cat_one_file "test.sh" >> test-all.sh
 	if [ "${dev_mode}" ] ; then
@@ -328,6 +332,9 @@ function build() {
 	cat_one_file "config.sh" >> start-all.sh
 	cat_one_file "start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
 	cat_parent_docker_file "start.sh" >> start-all.sh
+	while read inherit ; do
+		cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
+	done <<<"$(cat_one_file "pinherit")"
 	while read inherit ; do
 		cat_one_file "${PD}/${inherit}/start.sh" >> start-all.sh
 	done <<<"$(cat_one_file "inherit")"
