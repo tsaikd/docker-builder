@@ -11,7 +11,9 @@ if ! type sshd &>/dev/null ; then
 	fi
 
 	# set environment for ssh
-	env >> /etc/environment
+	set | grep "^DOCKER.*=" | sed 's/^/export /' >> /etc/profile.d/01-env.sh
+	set | grep "^http_proxy=" | sed 's/^/export /' >> /etc/profile.d/01-env.sh
+	set | grep "^https_proxy=" | sed 's/^/export /' >> /etc/profile.d/01-env.sh
 fi
 
 true
