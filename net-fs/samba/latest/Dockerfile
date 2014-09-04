@@ -9,7 +9,7 @@ EXPOSE 445
 
 ADD . $DOCKER_SRC
 
-RUN bash $DOCKER_SRC/build-all.sh
+RUN
 
-CMD bash $DOCKER_SRC/start-all.sh
+CMD
 

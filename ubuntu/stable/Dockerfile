@@ -2,13 +2,13 @@ FROM ubuntu:14.04
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
+ENV HOME /root
+
 ENV DOCKER_SRC
 
 ADD . $DOCKER_SRC
 
-ENV HOME /root
+RUN
 
-RUN bash $DOCKER_SRC/build-all.sh
-
-CMD bash $DOCKER_SRC/start-all.sh
+CMD
 

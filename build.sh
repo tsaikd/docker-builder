@@ -225,6 +225,8 @@ function build() {
 
 	# init Dockerfile part 2
 	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile" || exit $?
+	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile" || exit $?
+	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile" || exit $?
 	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile" || exit $?
 
 	# generate root ssh key file
