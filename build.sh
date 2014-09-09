@@ -160,6 +160,7 @@ function build() {
 	local auto_apt_get
 	local dev_mode
 	local inherit
+	local old_imgid
 
 	if ( [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ) && [ ! -d "${PD}/${buildpath}" ] ; then
 		if [ "${tag}" == "dev" ] ; then
@@ -345,6 +346,12 @@ function build() {
 		cat_one_file "${PD}/ubuntu/stable-dev/start.sh" >> start-all.sh
 	fi
 	cat_one_file "start-post.sh" "${PD}/ubuntu/stable/start-post.sh" >> start-all.sh
+
+	# check if image is used, then tag it with another name before new building
+	if [ "$(${docker} ps -a | sed "1d" | awk '{print $2}' | grep "^${DOCKER_BASE}/${imgname}:${tag}$")" ] ; then
+		old_imgid="$(${docker} images "${DOCKER_BASE}/${imgname}" | sed "1d" | grep "^${DOCKER_BASE}/${imgname}\\s\\+${tag}\\s" | awk '{print $3}')"
+		${docker} tag "${old_imgid}" "${DOCKER_BASE}/${imgname}:${tag}-$(date "+%Y%m%d-%H%M%S")" || exit $?
+	fi
 
 	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
 
