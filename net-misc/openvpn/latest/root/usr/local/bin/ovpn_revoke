@@ -1,0 +1,31 @@
+#!/bin/bash
+
+cn="${1}"
+
+function usage() {
+	local msg="$*"
+	cat <<-EOF
+Usage:
+	ovpn_revoke <Client Name>
+
+${msg}
+	EOF
+	exit 1
+}
+
+if [ -z "${cn}" ] ; then
+	usage "[ERROR] Empty Client Name"
+fi
+
+if [ ! -f "/etc/openvpn/pki/private/${cn}.key" ] ; then
+	echo "Unable to find ${cn}, you do not need to revoke a non-existed client"
+	exit 1
+fi
+
+easyrsa revoke "${cn}" || exit $?
+easyrsa gen-crl || exit $?
+
+rm -f "/etc/openvpn/pki/reqs/${cn}.req"
+rm -f "/etc/openvpn/pki/private/${cn}.key"
+rm -f "/etc/openvpn/pki/issued/${cn}.crt"
+

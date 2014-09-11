@@ -29,6 +29,7 @@ sudo ./build.sh
 ## Run application example
 
 * [net-dns/dnsmasq/latest](net-dns/dnsmasq/latest)
+* [net-misc/openvpn/latest](net-misc/openvpn/latest)
 
 ```
 docker run -itd -p 80:80 tsaikd/www-servers.nginx:latest

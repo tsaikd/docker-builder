@@ -1,0 +1,71 @@
+#!/bin/bash
+
+cn="${1}"
+proto="${2}"
+host="${3}"
+port="${4}"
+
+function usage() {
+	local msg="$*"
+	cat <<-EOF
+Usage:
+	ovpn_getclient <Client Name> <Server Protocol> <Server Domain Name> <Server Port>
+
+Server Protocol:
+	tcp | udp
+
+${msg}
+	EOF
+	exit 1
+}
+
+if [ -z "${cn}" ] ; then
+	usage "[ERROR] Empty Client Name"
+fi
+
+if [ ! -f "/etc/openvpn/pki/private/${cn}.key" ] ; then
+	echo "Unable to find ${cn}, please try again or generate the key first"
+	exit 1
+fi
+
+if [ "${proto}" != "tcp" ] && [ "${proto}" != "udp" ] ; then
+	usage "[ERROR] Server Protocol can only be tcp or udp: ${proto}"
+fi
+
+if [ -z "${host}" ] ; then
+	usage "[ERROR] Empty Server Domain Name"
+fi
+
+if [ -z "${port}" ] ; then
+	usage "[ERROR] Empty Server Port"
+fi
+
+cat <<EOF
+client
+nobind
+dev tun
+remote-cert-tls server
+
+<key>
+$(cat /etc/openvpn/pki/private/${cn}.key)
+</key>
+<cert>
+$(cat /etc/openvpn/pki/issued/${cn}.crt)
+</cert>
+<ca>
+$(cat /etc/openvpn/pki/ca.crt)
+</ca>
+<dh>
+$(cat /etc/openvpn/pki/dh.pem)
+</dh>
+<tls-auth>
+$(cat /etc/openvpn/pki/ta.key)
+</tls-auth>
+key-direction 1
+
+<connection>
+remote ${host} ${port} ${proto}
+</connection>
+redirect-gateway def1
+EOF
+
