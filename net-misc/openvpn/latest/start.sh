@@ -20,6 +20,7 @@ tls-auth /etc/openvpn/pki/ta.key
 crl-verify /etc/openvpn/pki/crl.pem
 key-direction 0
 keepalive 10 60
+comp-lzo
 persist-key
 persist-tun
 push "dhcp-option DNS 168.95.1.1"
