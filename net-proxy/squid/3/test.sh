@@ -8,7 +8,7 @@ for i in squid3 ; do
 done
 
 for i in 3128 ; do
-	echo "Testing port ${i} is opened ..."
+	echo "Testing tcp port ${i} is opened ..."
 	while [ -z "$(netstat -tln | grep "${i} ")" ] ; do
 		[ "$(date +%s)" -gt "${maxtime}" ] && exit 1
 		sleep 1
