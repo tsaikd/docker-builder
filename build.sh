@@ -228,6 +228,7 @@ function build() {
 	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile" || exit $?
 	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile" || exit $?
 	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile" || exit $?
+	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\", \"/opt/docker/DOCKER_BASE/${buildpath}/start-all.sh\"]" "Dockerfile" || exit $?
 	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile" || exit $?
 
 	# generate root ssh key file
@@ -288,6 +289,7 @@ function build() {
 
 	# generate build-all.sh
 	> build-all.sh
+	chmod +x build-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> build-all.sh
 	cat_one_file "${PD}/config.sh" >> build-all.sh
 	cat_one_file "config.sh" >> build-all.sh
@@ -311,6 +313,7 @@ function build() {
 
 	# generate test-all.sh
 	> test-all.sh
+	chmod +x test-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> test-all.sh
 	cat_one_file "${PD}/config.sh" >> test-all.sh
 	cat_one_file "config.sh" >> test-all.sh
@@ -330,6 +333,7 @@ function build() {
 
 	# generate start-all.sh
 	> start-all.sh
+	chmod +x start-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> start-all.sh
 	cat_one_file "${PD}/config.sh" >> start-all.sh
 	cat_one_file "config.sh" >> start-all.sh
