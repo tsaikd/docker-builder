@@ -1,0 +1,6 @@
+#!/bin/bash
+
+wrapdocker "$@" &
+
+true
+
