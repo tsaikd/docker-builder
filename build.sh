@@ -85,7 +85,7 @@ function cat_one_file() {
 }
 
 function cat_parent_docker_file() {
-	local parent_buildpath="$(sed -n "s/^FROM ${DOCKER_BASE}\\///p" Dockerfile | sed 's/[\.:]/\//g')"
+	local parent_buildpath="$(grep "^FROM ${DOCKER_BASE}/" Dockerfile | cut -c$((${#DOCKER_BASE} + 7))- | sed 's/[\.:]/\//g')"
 	local parent_docker="${PD}/${parent_buildpath}"
 	local curdir="${PWD}"
 	local f
@@ -232,7 +232,7 @@ function build() {
 	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile"
 	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile"
 	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\", \"/opt/docker/DOCKER_BASE/${buildpath}/start-all.sh\"]" "Dockerfile"
-	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile"
+	sed -i "s|DOCKER_BASE|${DOCKER_BASE}|g" "Dockerfile"
 
 	# generate root ssh key file
 	if [ "${ROOT_PUBKEY}" ] ; then
@@ -369,7 +369,7 @@ function build() {
 
 function rebuild() {
 	echo "Collecting current images info ..."
-	local images="$(${docker} images | sed "1d;s/\./\\//g" | awk '/^'"${DOCKER_BASE}"'\//{print $1"/"$2}' | cut -d/ -f2-)"
+	local images="$(${docker} images | sed "1d" | grep "^${DOCKER_BASE}/" | awk '{print $1"/"$2}' | cut -c$((${#DOCKER_BASE} + 2))- | sed "s/\./\\//g")"
 	local imagesnum="$(wc -l <<<"${images}")"
 	local buildpath
 	local tailpath
