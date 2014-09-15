@@ -2,7 +2,7 @@
 
 for i in ruby gem ; do
 	echo "Testing command ${i} is valid ..."
-	type "${i}" &>/dev/null || exit 1
+	type "${i}" &>/dev/null
 done
 
 echo "Testing go version ..."

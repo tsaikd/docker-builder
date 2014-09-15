@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 cn="${1}"
 
 function usage() {
@@ -22,8 +24,8 @@ if [ ! -f "/etc/openvpn/pki/private/${cn}.key" ] ; then
 	exit 1
 fi
 
-easyrsa revoke "${cn}" || exit $?
-easyrsa gen-crl || exit $?
+easyrsa revoke "${cn}"
+easyrsa gen-crl
 
 rm -f "/etc/openvpn/pki/reqs/${cn}.req"
 rm -f "/etc/openvpn/pki/private/${cn}.key"

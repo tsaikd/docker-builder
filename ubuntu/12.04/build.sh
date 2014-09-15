@@ -8,9 +8,9 @@ if [ "${APT_SITE}" ] ; then
 	echo "deb ${APT_SITE} precise main universe" > /etc/apt/sources.list
 fi
 
-locale-gen "${LANG}" || exit $?
+locale-gen "${LANG}"
 
-dpkg-reconfigure locales || exit $?
+dpkg-reconfigure locales
 
-update-locale LANG="${LANG}" || exit $?
+update-locale LANG="${LANG}"
 

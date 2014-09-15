@@ -1,6 +1,6 @@
 #!/bin/bash
 
-service dnsmasq restart || exit $?
+service dnsmasq restart
 
 true
 

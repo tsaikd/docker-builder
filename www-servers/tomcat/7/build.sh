@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt-get -q -y install tomcat7 tomcat7-admin || exit $?
+apt-get -q -y install tomcat7 tomcat7-admin
 
 cat > "/etc/tomcat7/tomcat-users.xml" <<EOF
 <?xml version='1.0' encoding='utf-8'?>

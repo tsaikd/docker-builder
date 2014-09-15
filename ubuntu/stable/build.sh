@@ -8,12 +8,12 @@ fi
 
 if [ -f "/usr/share/zoneinfo/${TIMEZONE}" ] ; then
 	echo "${TIMEZONE}" > /etc/timezone
-	dpkg-reconfigure --frontend noninteractive tzdata || exit $?
+	dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
-locale-gen "${LANG}" || exit $?
+locale-gen "${LANG}"
 
-dpkg-reconfigure locales || exit $?
+dpkg-reconfigure locales
 
-update-locale LANG="${LANG}" || exit $?
+update-locale LANG="${LANG}"
 

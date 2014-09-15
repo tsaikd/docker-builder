@@ -1,4 +1,4 @@
 #!/bin/bash
 
-apt-get -q -y install maven || exit $?
+apt-get -q -y install maven
 

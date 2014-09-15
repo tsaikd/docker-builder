@@ -8,8 +8,8 @@ deb http://ppa.launchpad.net/nginx/stable/ubuntu ${redist} main
 deb-src http://ppa.launchpad.net/nginx/stable/ubuntu ${redist} main
 EOF
 
-	apt-get -q update || exit $?
+	apt-get -q update
 
-	apt-get -q -y --force-yes install nginx || exit $?
+	apt-get -q -y --force-yes install nginx
 fi
 

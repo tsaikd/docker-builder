@@ -8,11 +8,11 @@ deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu ${redist} main
 deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu ${redist} main
 EOF
 
-	apt-get -q -y update || exit $?
+	apt-get -q -y update
 
-	apt-get -q -y --force-yes install nodejs || exit $?
+	apt-get -q -y --force-yes install nodejs
 
-	ln -s /usr/bin/nodejs /usr/local/bin/node || exit $?
+	ln -s /usr/bin/nodejs /usr/local/bin/node
 fi
 
 true

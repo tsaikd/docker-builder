@@ -2,18 +2,18 @@
 
 ver="8.0.11"
 
-tar -C /usr/local -xzf $DOCKER_SRC/apache-tomcat-$ver.tar.gz || exit $?
+tar -C /usr/local -xzf $DOCKER_SRC/apache-tomcat-$ver.tar.gz
 
-mv /usr/local/apache-tomcat-$ver/conf /etc/tomcat8 || exit $?
-mv /usr/local/apache-tomcat-$ver/logs /var/log/tomcat8 || exit $?
-mv /usr/local/apache-tomcat-$ver/work /var/cache/tomcat8 || exit $?
-mv /usr/local/apache-tomcat-$ver /var/lib/tomcat8 || exit $?
+mv /usr/local/apache-tomcat-$ver/conf /etc/tomcat8
+mv /usr/local/apache-tomcat-$ver/logs /var/log/tomcat8
+mv /usr/local/apache-tomcat-$ver/work /var/cache/tomcat8
+mv /usr/local/apache-tomcat-$ver /var/lib/tomcat8
 
-cd /var/lib/tomcat8 || exit $?
+cd /var/lib/tomcat8
 
-ln -s /etc/tomcat8 conf || exit $?
-ln -s ../../log/tomcat8 logs || exit $?
-ln -s ../../cache/tomcat8 work || exit $?
+ln -s /etc/tomcat8 conf
+ln -s ../../log/tomcat8 logs
+ln -s ../../cache/tomcat8 work
 
 cat > "/etc/tomcat8/tomcat-users.xml" <<EOF
 <?xml version='1.0' encoding='utf-8'?>

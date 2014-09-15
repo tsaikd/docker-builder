@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
+
 PN="${BASH_SOURCE[0]##*/}"
 PD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "${PD}/config.sh.sample" || exit $?
+source "${PD}/config.sh.sample"
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
 
 function usage() {
@@ -15,7 +17,8 @@ Options:
 
 Image:Tag, ex: ubuntu:stable, ex: ubuntu/stable, ex: ubuntu/stable/
 EOF
-	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; } || exit 0
+	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; }
+	exit 0
 }
 
 if [ "$(id -u)" -gt 0 ] ; then
@@ -24,16 +27,16 @@ else
 	sudo=""
 fi
 
-if hash docker 2>/dev/null ; then
+if type docker &>/dev/null ; then
 	docker="${sudo} docker"
-elif hash docker.io 2>/dev/null ; then
+elif type docker.io &>/dev/null ; then
 	docker="${sudo} docker.io"
 else
 	echo "docker command not found"
 	exit 1
 fi
 
-type getopt cat wget sha1sum md5sum >/dev/null || exit $?
+type getopt cat wget sha1sum md5sum >/dev/null
 
 opt="$(getopt -o hr -- "$@")" || usage "Parse options failed"
 
@@ -56,7 +59,7 @@ function check_copy_file() {
 	localfile="$(find "${PD}" -iname "${filename}" ! -empty -print -quit)"
 
 	if [ "${localfile}" ] ; then
-		cp -aL "${localfile}" "${filename}" || exit $?
+		cp -aL "${localfile}" "${filename}"
 	fi
 
 	if [ -s "${filename}" ] ; then
@@ -91,7 +94,7 @@ function cat_parent_docker_file() {
 	[ ! -d "${parent_docker}" ] && return
 	[ "${parent_docker%%/}" == "${PD%%/}" ] && return
 
-	pushd "${parent_docker}" >/dev/null || exit $?
+	pushd "${parent_docker}" >/dev/null
 	if [ "${curdir}" != "${PWD}" ] ; then
 
 		for f in "$@" ; do
@@ -101,7 +104,7 @@ function cat_parent_docker_file() {
 		cat_parent_docker_file "$@"
 
 	fi
-	popd >/dev/null || exit $?
+	popd >/dev/null
 }
 
 function cat_inherit() {
@@ -123,7 +126,7 @@ function process_download_file() {
 	local folder="${1%%/}"
 	[ "${folder:0:1}" != "/" ] && folder="${PD}/${folder}"
 
-	pushd "${folder}" >/dev/null || exit $?
+	pushd "${folder}" >/dev/null
 	# download if need
 	if [ -s download ] ; then
 		while read line ; do
@@ -137,12 +140,12 @@ function process_download_file() {
 
 	# checksum if need
 	if [ -s sha1sum ] ; then
-		sha1sum -c sha1sum || exit $?
+		sha1sum -c sha1sum
 	fi
 	if [ -s md5sum ] ; then
-		md5sum -c md5sum || exit $?
+		md5sum -c md5sum
 	fi
-	popd >/dev/null || exit $?
+	popd >/dev/null
 }
 
 function build() {
@@ -175,17 +178,17 @@ function build() {
 		fi
 
 		# reset tmp directory
-		rm -rf "${PD}/tmp/${buildpath}" || exit $?
-		mkdir -p "${PD}/tmp/${buildpath}" || exit $?
+		rm -rf "${PD}/tmp/${buildpath}"
+		mkdir -p "${PD}/tmp/${buildpath}"
 
-		pushd "${PD}/tmp/${buildpath}" >/dev/null || exit $?
-		cp -a "${PD}/${imgpath}/${parent_tag}/Dockerfile" "./" || exit $?
-		sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "Dockerfile" || exit $?
+		pushd "${PD}/tmp/${buildpath}" >/dev/null
+		cp -a "${PD}/${imgpath}/${parent_tag}/Dockerfile" "./"
+		sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "Dockerfile"
 		if [ -z "$(grep "^EXPOSE 22$" "Dockerfile")" ] ; then
 			echo "EXPOSE 22" >> "Dockerfile"
 		fi
-		cp -a "${PD}/ubuntu/stable-dev/inherit" "inherit" || exit $?
-		popd >/dev/null || exit $?
+		cp -a "${PD}/ubuntu/stable-dev/inherit" "inherit"
+		popd >/dev/null
 	else
 		if [ ! -f "${PD}/${buildpath}/Dockerfile" ] ; then
 			echo "${buildpath} is invalid package" >&2
@@ -195,13 +198,13 @@ function build() {
 		process_download_file "${buildpath}"
 
 		# reset tmp directory
-		rm -rf "${PD}/tmp/${buildpath}" || exit $?
-		mkdir -p "${PD}/tmp/${buildpath}" || exit $?
-		cp -aL "${PD}/${buildpath}" "${PD}/tmp/${imgpath}/" || exit $?
+		rm -rf "${PD}/tmp/${buildpath}"
+		mkdir -p "${PD}/tmp/${buildpath}"
+		cp -aL "${PD}/${buildpath}" "${PD}/tmp/${imgpath}/"
 	fi
 
 	# change to tmp directory
-	pushd "${PD}/tmp/${buildpath}" >/dev/null || exit $?
+	pushd "${PD}/tmp/${buildpath}" >/dev/null
 
 	# init Dockerfile part 1
 	line="$(sed -n '/^FROM DOCKER_BASE\//p' "Dockerfile")"
@@ -220,23 +223,25 @@ function build() {
 		parent_tag="$(cut -d: -f2 <<<"${line}")"
 		parent_tag="${parent_tag:-latest}"
 		if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
-			build "${parent_imgpath}/${parent_tag}" || exit $?
+			build "${parent_imgpath}/${parent_tag}"
 		fi
 	fi
 
 	# init Dockerfile part 2
-	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile" || exit $?
-	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile" || exit $?
-	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile" || exit $?
-	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\", \"/opt/docker/DOCKER_BASE/${buildpath}/start-all.sh\"]" "Dockerfile" || exit $?
-	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile" || exit $?
+	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile"
+	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile"
+	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile"
+	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\", \"/opt/docker/DOCKER_BASE/${buildpath}/start-all.sh\"]" "Dockerfile"
+	sed -i "s/DOCKER_BASE/${DOCKER_BASE}/g" "Dockerfile"
 
 	# generate root ssh key file
-	mkdir -p "root/root/.ssh" || exit $?
-	for filename in ${ROOT_PUBKEY} ; do
-		cat "${filename}" >> root/root/.ssh/authorized_keys || exit $?
-	done
-	chmod 600 root/root/.ssh/authorized_keys || exit $?
+	if [ "${ROOT_PUBKEY}" ] ; then
+		mkdir -p "root/root/.ssh"
+		for filename in ${ROOT_PUBKEY} ; do
+			cat "${filename}" >> root/root/.ssh/authorized_keys
+		done
+		chmod 600 root/root/.ssh/authorized_keys
+	fi
 
 	# check inherit of inherit
 	echo "Checking inherit list ..."
@@ -252,12 +257,12 @@ function build() {
 
 		# copy inherit root file
 		if [ -d "${PD}/${inherit}/root" ] ; then
-			cp -aL "${PD}/${inherit}/root" ./ || exit $?
+			cp -aL "${PD}/${inherit}/root" ./
 		fi
 	done <<<"$(cat_one_file "inherit")"
-	sed -i '/^\s*$/d;/^\s*#/d' "download" || exit $?
-	sed -i '/^\s*$/d;/^\s*#/d' "sha1sum" || exit $?
-	sed -i '/^\s*$/d;/^\s*#/d' "md5sum" || exit $?
+	sed -i '/^\s*$/d;/^\s*#/d' "download"
+	sed -i '/^\s*$/d;/^\s*#/d' "sha1sum"
+	sed -i '/^\s*$/d;/^\s*#/d' "md5sum"
 	process_download_file "${PD}/tmp/${buildpath}"
 
 	# check necessary to auto apt-get update and clean
@@ -288,7 +293,7 @@ function build() {
 	fi
 
 	# generate build-all.sh
-	> build-all.sh
+	echo "set -e" > build-all.sh
 	chmod +x build-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> build-all.sh
 	cat_one_file "${PD}/config.sh" >> build-all.sh
@@ -296,7 +301,7 @@ function build() {
 	cat_one_file "build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
 	if [ "${auto_apt_get}" ] ; then
 		echo '# auto_apt_get' >> build-all.sh
-		echo 'apt-get -q update || exit $?' >> build-all.sh
+		echo 'apt-get -q update' >> build-all.sh
 	fi
 	while read inherit ; do
 		cat_one_file "${PD}/${inherit}/build.sh" >> build-all.sh
@@ -307,12 +312,12 @@ function build() {
 	fi
 	if [ "${auto_apt_get}" ] ; then
 		echo '# auto_apt_get' >> build-all.sh
-		echo 'apt-get -q clean || exit $?' >> build-all.sh
+		echo 'apt-get -q clean' >> build-all.sh
 	fi
 	cat_one_file "build-post.sh" "${PD}/ubuntu/stable/build-post.sh" >> build-all.sh
 
 	# generate test-all.sh
-	> test-all.sh
+	echo "set -e" > test-all.sh
 	chmod +x test-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> test-all.sh
 	cat_one_file "${PD}/config.sh" >> test-all.sh
@@ -332,7 +337,7 @@ function build() {
 	cat_one_file "test-post.sh" "${PD}/ubuntu/stable/test-post.sh" >> test-all.sh
 
 	# generate start-all.sh
-	> start-all.sh
+	echo "set -e" > start-all.sh
 	chmod +x start-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> start-all.sh
 	cat_one_file "${PD}/config.sh" >> start-all.sh
@@ -354,12 +359,12 @@ function build() {
 	# check if image is used, then tag it with another name before new building
 	if [ "$(${docker} ps -a | sed "1d" | awk '{print $2}' | grep "^${DOCKER_BASE}/${imgname}:${tag}$")" ] ; then
 		old_imgid="$(${docker} images "${DOCKER_BASE}/${imgname}" | sed "1d" | grep "^${DOCKER_BASE}/${imgname}\\s\\+${tag}\\s" | awk '{print $3}')"
-		${docker} tag "${old_imgid}" "${DOCKER_BASE}/${imgname}:${tag}-$(date "+%Y%m%d-%H%M%S")" || exit $?
+		${docker} tag "${old_imgid}" "${DOCKER_BASE}/${imgname}:${tag}-$(date "+%Y%m%d-%H%M%S")"
 	fi
 
-	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" . || exit $?
+	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" .
 
-	popd >/dev/null || exit $?
+	popd >/dev/null
 }
 
 function rebuild() {
@@ -371,7 +376,7 @@ function rebuild() {
 	local parent_imgpath
 	local i
 
-	pushd "${PD}" >/dev/null || exit $?
+	pushd "${PD}" >/dev/null
 	for ((i=imagesnum ; i>=1 ; i--)) ; do
 		buildpath="$(sed -n "${i}p" <<<"${images}")"
 		if [ ! -d "${buildpath}" ] ; then
@@ -390,9 +395,9 @@ function rebuild() {
 				continue
 			fi
 		fi
-		build "${buildpath}" || exit $?
+		build "${buildpath}"
 	done
-	popd >/dev/null || exit $?
+	popd >/dev/null
 }
 
 if [ "${FLAG_REBUILD}" == "1" ] ; then

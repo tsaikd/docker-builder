@@ -1,6 +1,6 @@
 #!/bin/bash
 
-service smbd restart || exit $?
+service smbd restart
 
 true
 

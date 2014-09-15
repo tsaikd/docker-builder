@@ -30,17 +30,17 @@ EOF
 fi
 
 echo "Patch ${HOME}/.fonts.conf"
-sed -i 's|\(\s*\)</edit>|\1  '"<string>Noto Sans Japanese</string>"'\n\0|i' "${HOME}/.fonts.conf" || exit $?
+sed -i 's|\(\s*\)</edit>|\1  '"<string>Noto Sans Japanese</string>"'\n\0|i' "${HOME}/.fonts.conf"
 
-mkdir -p "${HOME}/.fonts/noto" || exit $?
-mkdir -p "/tmp/font-$$" || exit $?
+mkdir -p "${HOME}/.fonts/noto"
+mkdir -p "/tmp/font-$$"
 
-pushd "/tmp/font-$$" &>/dev/null || exit $?
+pushd "/tmp/font-$$" &>/dev/null
 
-unzip "${DOCKER_SRC}/NotoSansJapanese-hinted.zip" || exit $?
-mv *.otf "${HOME}/.fonts/noto" || exit $?
+unzip "${DOCKER_SRC}/NotoSansJapanese-hinted.zip"
+mv *.otf "${HOME}/.fonts/noto"
 
-popd &>/dev/null || exit $?
+popd &>/dev/null
 
-rm -rf "/tmp/font-$$" || exit $?
+rm -rf "/tmp/font-$$"
 

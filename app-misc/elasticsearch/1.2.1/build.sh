@@ -2,9 +2,9 @@
 
 ver="1.2.1"
 
-pushd /usr/local &>/dev/null || exit $?
+pushd /usr/local &>/dev/null
 
-tar -xzf "${DOCKER_SRC}/elasticsearch-${ver}.tar.gz" || exit $?
+tar -xzf "${DOCKER_SRC}/elasticsearch-${ver}.tar.gz"
 
-popd &>/dev/null || exit $?
+popd &>/dev/null
 

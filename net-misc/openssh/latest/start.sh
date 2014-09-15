@@ -1,6 +1,6 @@
 #!/bin/bash
 
-service ssh restart || exit $?
+service ssh restart
 
 true
 

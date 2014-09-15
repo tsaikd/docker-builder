@@ -4,7 +4,7 @@ maxtime="$(( $(date +%s) + 60 ))"
 
 for i in squid3 ; do
 	echo "Testing command ${i} is valid ..."
-	type "${i}" &>/dev/null || exit 1
+	type "${i}" &>/dev/null
 done
 
 for i in 3128 ; do

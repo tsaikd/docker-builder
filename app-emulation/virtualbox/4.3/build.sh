@@ -7,9 +7,9 @@ if ! type virtualbox &>/dev/null ; then
 deb http://download.virtualbox.org/virtualbox/debian ${redist} contrib
 EOF
 
-	apt-get -q update || exit $?
+	apt-get -q update
 
-	apt-get -q -y --force-yes install linux-headers-$(uname -r) virtualbox-4.3 || exit $?
+	apt-get -q -y --force-yes install linux-headers-$(uname -r) virtualbox-4.3
 
 	sed -in 's|\(MINOR=.*vboxdrv\)$\?\(.* /proc/misc.\)$|\1$\2|' /etc/init.d/vboxdrv
 fi

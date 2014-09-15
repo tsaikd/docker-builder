@@ -1,11 +1,11 @@
 #!/bin/bash
 
 if [ -d "/var/cache/apt-cacher-ng" ] ; then
-	chown 103:106 -R "/var/cache/apt-cacher-ng" || exit $?
+	chown 103:106 -R "/var/cache/apt-cacher-ng"
 fi
 
 if ! type apt-cacher-ng &>/dev/null ; then
-	apt-get -q -y install apt-cacher-ng || exit $?
+	apt-get -q -y install apt-cacher-ng
 	if [ "${http_proxy}" ] ; then
 		echo "Proxy: ${http_proxy}" >> /etc/apt-cacher-ng/acng.conf
 	elif [ "${https_proxy}" ] ; then
