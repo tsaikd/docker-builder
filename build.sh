@@ -222,6 +222,10 @@ function build() {
 		parent_imgpath="$(echo "${parent_imgname}" | sed 's/\./\//g')"
 		parent_tag="$(cut -d: -f2 <<<"${line}")"
 		parent_tag="${parent_tag:-latest}"
+		if [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
+			# update parent image by docker pull if in private registory
+			${docker} pull "${DOCKER_BASE}/${parent_imgname}:${parent_tag}"
+		fi
 		if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
 			build "${parent_imgpath}/${parent_tag}"
 		fi
