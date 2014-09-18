@@ -368,6 +368,11 @@ function build() {
 
 	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" .
 
+	# push to private registory
+	if [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
+		${docker} push "${DOCKER_BASE}/${imgname}:${tag}"
+	fi
+
 	popd >/dev/null
 }
 
