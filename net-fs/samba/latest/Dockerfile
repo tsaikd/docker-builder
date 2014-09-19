@@ -4,6 +4,8 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC
 
+EXPOSE 137/udp
+EXPOSE 138/udp
 EXPOSE 139
 EXPOSE 445
 
