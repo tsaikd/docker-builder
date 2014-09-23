@@ -10,6 +10,9 @@ export DOCKER_BASE="tsaikd"
 # reset language
 export LANG="en_US.UTF-8"
 
+# all supported language, seperated by space
+export SUPPORT_LANG="zh_TW.UTF-8 zh_CN.UTF-8 ja_JP.UTF-8 ko_KR.UTF-8"
+
 # timezone, it should exists in sub folder of /usr/share/zoneinfo
 export TIMEZONE="UTC"
 
