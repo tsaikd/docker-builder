@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# used for docker image base name, like "tsaikd"/ubuntu, ex: tsaikd
-# support private registry, ex: 192.168.0.1:5000/tsaikd
+# used for docker image base name, like "tsaikd"/ubuntu
+# ex: tsaikd
+# support private registry
+# ex: 192.168.0.1:5000/tsaikd
+# ex: 192.168.0.1:5000
 export DOCKER_BASE="tsaikd"
 
 # reset language
@@ -10,17 +13,19 @@ export LANG="en_US.UTF-8"
 # timezone, it should exists in sub folder of /usr/share/zoneinfo
 export TIMEZONE="UTC"
 
-# apt-proxy, ex: http://apt.tsaikd.org:9999/
+# apt-proxy, ex: http://apt.tsaikd.org:3142/
 export APT_PROXY=""
 
 # apt-site, ex: http://tw.archive.ubuntu.com/ubuntu/
 export APT_SITE="http://tw.archive.ubuntu.com/ubuntu/"
 
 # root password, used in dev mode
+# Note: you can not use 'CHANGE_IT' as your root password
 export ROOT_PASSWD="CHANGE_IT"
 
 # root ssh key path, used in dev mode, seperated with space
-export ROOT_PUBKEY="/root/.ssh/id_rsa.pub"
+# ex: /root/.ssh/id_rsa.pub
+export ROOT_PUBKEY=""
 
 # tomcat manager name
 export TOMCAT_ADMIN_NAME="admin"

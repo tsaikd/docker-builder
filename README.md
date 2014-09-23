@@ -16,14 +16,14 @@ Some customizable Dockerfile scripts
 > You can put custom start script in [Image]/[Tag]/root/ or [Image]/[Tag]/custom/
 
 ## Build images
-Build images on your local docker host.
+Build ubuntu images on your local docker host.
 ```
-sudo ./build.sh
+./build.sh ubuntu/stable
 ```
 
 ## Supported images
 ```
-./build.sh -h
+./build.sh -l
 ```
 
 ## Run application example

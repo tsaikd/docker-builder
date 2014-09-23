@@ -36,15 +36,18 @@ else
 	exit 1
 fi
 
+export DOCKER_BASE="${DOCKER_BASE%%/}"
+
 type getopt cat wget sha1sum md5sum >/dev/null
 
-opt="$(getopt -o hr -- "$@")" || usage "Parse options failed"
+opt="$(getopt -o hrl -- "$@")" || usage "Parse options failed"
 
 eval set -- "${opt}"
 while true ; do
 	case "${1}" in
 	-h) usage ; shift ;;
 	-r) FLAG_REBUILD="1" ; shift ;;
+	-l) FLAG_LIST="1" ; shift ;;
 	--) shift ; break ;;
 	*) echo "Internal error!" ; exit 1 ;;
 	esac
@@ -409,7 +412,11 @@ function rebuild() {
 	popd >/dev/null
 }
 
-if [ "${FLAG_REBUILD}" == "1" ] ; then
+if [ "${FLAG_LIST}" == "1" ] ; then
+	pushd "${PD}" >/dev/null
+	find -iname Dockerfile | sed 's|^./||g;s|/Dockerfile$||g;/^tmp\//d'
+	popd >/dev/null
+elif [ "${FLAG_REBUILD}" == "1" ] ; then
 	rebuild
 else
 	for i in "$@" ; do
