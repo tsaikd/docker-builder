@@ -250,10 +250,26 @@ function build() {
 		chmod 600 root/root/.ssh/authorized_keys
 	fi
 
+	# reset inherit
+	> pinherit
+	> inherit
+
 	# check inherit of inherit
 	echo "Checking inherit list ..."
-	cat_inherit "${parent_imgpath}/${parent_tag}" | awk '!a[$0]++' > pinherit
-	cat_inherit "${buildpath}" | awk '!a[$0]++' > inherit
+	cat_inherit "${parent_imgpath}/${parent_tag}" >> pinherit
+	cat_inherit "${buildpath}" >> inherit
+
+	# check GUI inherit
+	if [ -e "GUI_INHERIT" ] ; then
+		for inherit in ${GUI_INHERIT} ; do
+			cat_inherit "${inherit}" >> inherit
+			echo "${inherit}" >> inherit
+		done
+	fi
+
+	# inherit dedup
+	echo "$(cat pinherit | awk '!a[$0]++')" > pinherit
+	echo "$(cat inherit | awk '!a[$0]++')" > inherit
 
 	# process inherit function
 	while read inherit ; do
