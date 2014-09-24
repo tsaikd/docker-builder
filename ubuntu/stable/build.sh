@@ -6,6 +6,11 @@ if [ "${APT_SITE}" ] ; then
 	echo "deb ${APT_SITE} trusty-security main universe" >> /etc/apt/sources.list
 fi
 
+cat > /etc/apt/apt.conf.d/02nocache <<EOF
+Dir::Cache "";
+Dir::Cache::archives "";
+EOF
+
 locale-gen ${LANG} ${SUPPORT_LANG}
 
 dpkg-reconfigure locales
