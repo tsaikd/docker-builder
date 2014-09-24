@@ -2,6 +2,7 @@
 
 if [ ! -f "/etc/fonts/conf.d/55-noto-mono.conf" ] ; then
 	echo "Install /etc/fonts/conf.d/55-noto-mono.conf"
+	mkdir -p "/etc/fonts/conf.d"
 	cat > "/etc/fonts/conf.d/55-noto-mono.conf" <<EOF
 <fontconfig>
 	<match target="pattern">
