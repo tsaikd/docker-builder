@@ -14,6 +14,7 @@ Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
   -h       : show this help message
   -r       : rebuild all existed images
+  -l       : list all supported images
 
 Image:Tag, ex: ubuntu:stable, ex: ubuntu/stable, ex: ubuntu/stable/
 EOF
