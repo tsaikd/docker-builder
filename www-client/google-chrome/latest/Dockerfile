@@ -1,0 +1,14 @@
+FROM DOCKER_BASE/ubuntu:stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+
+EXPOSE 22
+
+ADD . $DOCKER_SRC
+
+RUN
+
+CMD
+
