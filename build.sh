@@ -12,11 +12,19 @@ function usage() {
 	cat <<EOF
 Usage: ${PN} [Options] [Images ...] [Image:Tag]
 Options:
-  -h       : show this help message
-  -r       : rebuild all existed images
-  -l       : list all supported images
+  -h        : show this help message
+  -r        : rebuild all existed images
+  -l        : list all supported images
+  -f <file> : build images list from <file>
 
-Image:Tag, ex: ubuntu:stable, ex: ubuntu/stable, ex: ubuntu/stable/
+Image:Tag supported format:
+	ex: ubuntu:stable
+	ex: ubuntu/stable
+	ex: ubuntu/stable/
+
+Build images list file format:
+	one <Image:Tag> per line
+	use # to disable like bash comment
 EOF
 	[ $# -gt 0 ] && { echo ; echo "$@" ; exit 1 ; }
 	exit 0
@@ -41,7 +49,7 @@ export DOCKER_BASE="${DOCKER_BASE%%/}"
 
 type getopt cat wget sha1sum md5sum >/dev/null
 
-opt="$(getopt -o hrl -- "$@")" || usage "Parse options failed"
+opt="$(getopt -o hrlf: -- "$@")" || usage "Parse options failed"
 
 eval set -- "${opt}"
 while true ; do
@@ -49,6 +57,7 @@ while true ; do
 	-h) usage ; shift ;;
 	-r) FLAG_REBUILD="1" ; shift ;;
 	-l) FLAG_LIST="1" ; shift ;;
+	-f) FLAG_LISTFILE="${2}" ; shift 2 ;;
 	--) shift ; break ;;
 	*) echo "Internal error!" ; exit 1 ;;
 	esac
@@ -435,6 +444,10 @@ if [ "${FLAG_LIST}" == "1" ] ; then
 	popd >/dev/null
 elif [ "${FLAG_REBUILD}" == "1" ] ; then
 	rebuild
+elif [ -f "${FLAG_LISTFILE}" ] ; then
+	for i in $(cat "${FLAG_LISTFILE}" | grep -v "^#") ; do
+		build "${i}"
+	done
 else
 	for i in "$@" ; do
 		build "${i}"
