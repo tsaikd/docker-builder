@@ -1,4 +1,5 @@
 #!/bin/bash
 
-service tomcat7 restart
+# ubuntu tomcat7 startup with bug, no need to check exec code
+service tomcat7 start || true
 
