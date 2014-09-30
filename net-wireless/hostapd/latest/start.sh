@@ -78,5 +78,5 @@ EOF
 if [ "${INTERFACE}" ] ; then
     hostapd_main
 else
-    echo "An interface must be specified, aborted!"
+    echo "[Error] An interface must be specified."
 fi
