@@ -1,0 +1,12 @@
+#!/bin/bash
+
+base="/var/lib/consul"
+consul="${base}/consul"
+
+if [ "$1" == "agent" ] ; then
+	shift
+	${consul} agent -config-dir="${base}/config" "$@"
+else
+	${consul} "$@"
+fi
+
