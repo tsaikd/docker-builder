@@ -65,11 +65,12 @@ EOF
         for int in ${ints}
         do
             echo "Setting iptables for outgoing traffics on ${int}..."
-            iptables -t nat -D POSTROUTING -s ${SUBNET}/24 -o ${int} -j MASQUERADE || true
+            iptables -t nat -D POSTROUTING -s ${SUBNET}/24 -o ${int} -j MASQUERADE > /dev/null 2>&1 || true
             iptables -t nat -A POSTROUTING -s ${SUBNET}/24 -o ${int} -j MASQUERADE
         done
     else
         echo "Setting iptables for outgoing traffics on all interfaces..."
+        iptables -t nat -D POSTROUTING -s ${SUBNET}/24 -j MASQUERADE > /dev/null 2>&1 || true
         iptables -t nat -A POSTROUTING -s ${SUBNET}/24 -j MASQUERADE
     fi
 }
