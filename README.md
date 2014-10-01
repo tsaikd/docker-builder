@@ -143,3 +143,6 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/dev-db.solr:4.7
 	docker run -i -t -d -p 8080 -v /docker-data/tomcat-7/custom:/opt/docker/tsaikd/tomcat-7/custom tsaikd/tomcat:7
 	```
 
+## Build script notes
+* Use env `DOCKER_BUILDING` == 1 in start.sh test.sh to check if in building step
+
