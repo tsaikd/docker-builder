@@ -445,7 +445,7 @@ if [ "${FLAG_LIST}" == "1" ] ; then
 elif [ "${FLAG_REBUILD}" == "1" ] ; then
 	rebuild
 elif [ -f "${FLAG_LISTFILE}" ] ; then
-	for i in $(cat "${FLAG_LISTFILE}" | grep -v "^#") ; do
+	for i in $(sed "s/#.*$//g;s/\\s*$//g;/^$/d" "${FLAG_LISTFILE}") ; do
 		build "${i}"
 	done
 else
