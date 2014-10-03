@@ -7,8 +7,7 @@ if [ "${APT_SITE}" ] ; then
 fi
 
 cat > /etc/apt/apt.conf.d/02nocache <<EOF
-Dir::Cache "";
-Dir::Cache::archives "";
+DPkg::Post-Invoke {"/bin/rm -f /var/cache/apt/archives/*.deb || true";};
 EOF
 
 locale-gen ${LANG} ${SUPPORT_LANG}
