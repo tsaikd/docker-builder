@@ -6,9 +6,12 @@ if [ "${APT_SITE}" ] ; then
 	echo "deb ${APT_SITE} trusty-security main universe" >> /etc/apt/sources.list
 fi
 
-cat > /etc/apt/apt.conf.d/02nocache <<EOF
+# docker official ubuntu built-in apt clean patch
+if [ ! -f "/etc/apt/apt.conf.d/docker-clean" ] ; then
+	cat > /etc/apt/apt.conf.d/02nocache <<EOF
 DPkg::Post-Invoke {"/bin/rm -f /var/cache/apt/archives/*.deb || true";};
 EOF
+fi
 
 locale-gen ${LANG} ${SUPPORT_LANG}
 
