@@ -1,5 +1,7 @@
 #!/bin/bash
 
+wait_iface
+
 if [ "${DOCKER_BUILDING}" == "1" ] ; then
 	CONSUL_SERVER="1"
 fi
