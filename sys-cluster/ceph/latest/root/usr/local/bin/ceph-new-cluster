@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -e
+
+export CEPH_OSD="${CEPH_OSD:-/var/lib/ceph/data/osd0}"
+export HOST="${HOST:-$(hostname)}"
+
+mkdir -p "/var/lib/ceph/data/deploy"
+pushd "/var/lib/ceph/data/deploy" >/dev/null
+
+if [ -f "ceph.conf" ] ; then
+	echo "ceph.conf existed, please join another cluster or remove it."
+	exit 1
+else
+	ceph-deploy new "${HOST}"
+
+	ceph-deploy --overwrite-conf mon create-initial
+fi
+
+ceph-deploy --overwrite-conf admin "${HOST}"
+
+# bug in 0.80.5, need to mkdir by hand
+mkdir -p /var/lib/ceph/osd
+
+for i in ${CEPH_OSD} ; do
+	if [ "${i:0:1}" == "/" ] ; then
+		if [ -d "${i}" ] ; then
+			if [ ! -f "${i}/fsid" ] ; then
+				ceph-deploy osd prepare "${HOST}:${i}"
+			fi
+
+			ceph-deploy osd activate "${HOST}:${i}"
+		fi
+	elif [ -e "/dev/${i}" ] ; then
+		ceph-deploy osd prepare "${HOST}:${i}"
+
+		ceph-deploy osd activate "${HOST}:${i}"
+	fi
+done
+
+popd >/dev/null
+

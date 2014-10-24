@@ -1,0 +1,19 @@
+FROM debian:latest
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV HOME /root
+
+ENV DOCKER_SRC
+
+EXPOSE 2022
+EXPOSE 6789 6800 6801 6802 6803 6804
+
+VOLUME ["/var/lib/ceph"]
+
+ADD . $DOCKER_SRC
+
+RUN
+
+CMD
+

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -e
+
+ceph -s >/dev/null
+
+mon_list="$(ceph mon dump 2>/dev/null | grep "mon.")"
+mon_valid_num="$(ceph mon stat | sed 's/^.* quorum \([^[:space:]]*\).*$/\1/; s/,/\n/g')"
+
+for i in ${mon_valid_num} ; do
+	mon_list="$(echo "${mon_list}" | sed "/^${i}:/d")"
+done
+
+mon_list="$(echo "${mon_list}" | sed "s/^.* mon\\.//g")"
+
+for i in ${mon_list} ; do
+	ceph mon remove "${i}"
+done
+
+
+osd_list="$(ceph osd tree | grep "\\sdown\\s" | awk '{print $1}')"
+
+for i in ${osd_list} ; do
+	ceph osd crush remove osd.${i}
+	ceph auth del osd.${i}
+	ceph osd rm ${i}
+done
+
+
+function find_empty_host() {
+	local empty_host="$(ceph osd tree | grep -A 1 "\\shost\\s")"
+	local host_line=""
+	local i
+	while read i ; do
+		if [ "${host_line}" ] && [ -z "$(echo "${i}" | grep "\\sosd.")" ] ; then
+			echo "${host_line}" | sed "s/^.*host //"
+		fi
+		if [ "$(echo "${i}" | grep "\\shost\\s")" ] ; then
+			host_line="${i}"
+		else
+			host_line=""
+		fi
+	done <<<"${empty_host}"
+	if [ "${host_line}" ] ; then
+		echo "${host_line}" | sed "s/^.*host //"
+	fi
+}
+
+empty_host="$(find_empty_host)"
+
+for i in ${empty_host} ; do
+	ceph osd crush remove ${i}
+done
+
