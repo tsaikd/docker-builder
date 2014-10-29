@@ -15,6 +15,7 @@ Options:
   -h        : show this help message
   -r        : rebuild all existed images
   -l        : list all supported images
+  -L        : build in local mode, without pull/push registry
   -f <file> : build images list from <file>
 
 Image:Tag supported format:
@@ -49,7 +50,7 @@ export DOCKER_BASE="${DOCKER_BASE%%/}"
 
 type getopt cat wget sha1sum md5sum >/dev/null
 
-opt="$(getopt -o hrlf: -- "$@")" || usage "Parse options failed"
+opt="$(getopt -o hrlLf: -- "$@")" || usage "Parse options failed"
 
 eval set -- "${opt}"
 while true ; do
@@ -57,6 +58,7 @@ while true ; do
 	-h) usage ; shift ;;
 	-r) FLAG_REBUILD="1" ; shift ;;
 	-l) FLAG_LIST="1" ; shift ;;
+	-L) FLAG_LOCAL="1" ; shift ;;
 	-f) FLAG_LISTFILE="${2}" ; shift 2 ;;
 	--) shift ; break ;;
 	*) echo "Internal error!" ; exit 1 ;;
@@ -235,7 +237,7 @@ function build() {
 		parent_imgpath="$(echo "${parent_imgname}" | sed 's/\./\//g')"
 		parent_tag="$(cut -d: -f2 <<<"${line}")"
 		parent_tag="${parent_tag:-latest}"
-		if [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
+		if [ "${FLAG_LOCAL}" != "1" ] && [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
 			# update parent image by docker pull if in private registory
 			if ! ${docker} pull "${DOCKER_BASE}/${parent_imgname}:${parent_tag}" ; then
 				# pull parent image failed, build parent
@@ -401,7 +403,7 @@ function build() {
 	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" .
 
 	# push to private registory
-	if [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
+	if [ "${FLAG_LOCAL}" != "1" ] && [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
 		${docker} push "${DOCKER_BASE}/${imgname}:${tag}"
 	fi
 
