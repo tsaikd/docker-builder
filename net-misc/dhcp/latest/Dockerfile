@@ -1,0 +1,11 @@
+FROM DOCKER_BASE/ubuntu:stable
+
+MAINTAINER kfei "kfei@kfei.net"
+
+ENV DOCKER_SRC
+
+ADD . $DOCKER_SRC
+
+RUN
+
+CMD
