@@ -8,8 +8,6 @@ fi
 function hostapd_main() {
     # Default values
     true ${SUBNET:=192.168.254.0}
-    true ${RANGE:="192.168.254.2 192.168.254.254"}
-    RANGE="$(sed 's/,\+/ /g' <<<"${RANGE}")"
     true ${AP_ADDR:=192.168.254.1}
     true ${SSID:=g8}
     true ${CHANNEL:=11}
@@ -34,27 +32,10 @@ wpa_ptk_rekey=600
 EOF
     fi
 
-    # Generate config file for dhcpd (isc-dhcp-server)
-    mkdir -p "/etc/dhcp"
-    if [ ! -f "/etc/dhcp/dhcpd.conf" ] ; then
-        cat > "/etc/dhcp/dhcpd.conf" <<EOF
-ddns-update-style none;
-default-lease-time 600;
-max-lease-time 7200;
-log-facility local7;
-subnet ${SUBNET} netmask 255.255.255.0 {
-    range ${RANGE};
-    option domain-name-servers 8.8.8.8, 168.95.192.1, 168.95.1.1;
-    option routers ${AP_ADDR};
-}
-EOF
-    fi
-
     # Setup interface and restart DHCP service 
     ip link set ${INTERFACE} up
     ip addr flush dev ${INTERFACE}
     ip addr add ${AP_ADDR}/24 dev ${INTERFACE}
-    service isc-dhcp-server restart
     /usr/sbin/hostapd /etc/hostapd/hostapd.conf &
 
     # NAT settings

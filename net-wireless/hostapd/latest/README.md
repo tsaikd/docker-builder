@@ -27,7 +27,6 @@ There is only one necessary environment variable:
 
 Other available environment variables are:
 * `SUBNET` with default `192.168.254.0`
-* `RANGE` with default `"192.168.254.2 192.168.254.254"`
 * `AP_ADDR` with default `192.168.254.1`
 * `SSID` with default `g8`
 * `CHANNEL` with default `11`
