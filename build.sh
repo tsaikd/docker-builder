@@ -56,6 +56,7 @@ else
 fi
 
 export DOCKER_BASE="${DOCKER_BASE%%/}"
+export DOCKER_TMP="${DOCKER_TMP:-/tmp/docker-builder/${USER}}"
 
 type getopt cat wget sha1sum md5sum >/dev/null
 
@@ -201,11 +202,11 @@ function build() {
 			exit 1
 		fi
 
-		# reset tmp directory
-		rm -rf "${PD}/tmp/${buildpath}"
-		mkdir -p "${PD}/tmp/${buildpath}"
+		# reset DOCKER_TMP directory
+		rm -rf "${DOCKER_TMP}/${buildpath}"
+		mkdir -p "${DOCKER_TMP}/${buildpath}"
 
-		pushd "${PD}/tmp/${buildpath}" >/dev/null
+		pushd "${DOCKER_TMP}/${buildpath}" >/dev/null
 		cp -a "${PD}/${imgpath}/${parent_tag}/Dockerfile" "./"
 		sed -i "s/^FROM .*$/FROM DOCKER_BASE\/${imgname}:${parent_tag}/" "Dockerfile"
 		if [ -z "$(grep "^EXPOSE 22$" "Dockerfile")" ] ; then
@@ -221,14 +222,14 @@ function build() {
 
 		process_download_file "${buildpath}"
 
-		# reset tmp directory
-		rm -rf "${PD}/tmp/${buildpath}"
-		mkdir -p "${PD}/tmp/${buildpath}"
-		cp -aL "${PD}/${buildpath}" "${PD}/tmp/${imgpath}/"
+		# reset DOCKER_TMP directory
+		rm -rf "${DOCKER_TMP}/${buildpath}"
+		mkdir -p "${DOCKER_TMP}/${buildpath}"
+		cp -aL "${PD}/${buildpath}" "${DOCKER_TMP}/${imgpath}/"
 	fi
 
-	# change to tmp directory
-	pushd "${PD}/tmp/${buildpath}" >/dev/null
+	# change to DOCKER_TMP directory
+	pushd "${DOCKER_TMP}/${buildpath}" >/dev/null
 
 	# init Dockerfile part 1
 	line="$(sed -n '/^FROM DOCKER_BASE\//p' "Dockerfile")"
@@ -310,7 +311,7 @@ function build() {
 	sed -i '/^\s*$/d;/^\s*#/d' "download"
 	sed -i '/^\s*$/d;/^\s*#/d' "sha1sum"
 	sed -i '/^\s*$/d;/^\s*#/d' "md5sum"
-	process_download_file "${PD}/tmp/${buildpath}"
+	process_download_file "${DOCKER_TMP}/${buildpath}"
 
 	# check necessary to auto apt-get update and clean
 	if [ "$(cat_one_file "build.sh" | grep "^[[:space:]]*apt-get ")" ] ; then
