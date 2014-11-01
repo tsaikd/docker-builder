@@ -1,35 +1,27 @@
-docker
-======
+docker-builder
+==============
 
 Some customizable Dockerfile scripts
 
-## Global customization
-* [Image]/[Tag]/root/
-> Put build time customization file here will copy to container root ('/')
-* [Image]/[Tag]/custom/
-> Put run time customization file here will copy to container root ('/')
-
-## Custom start script
-* /start-pre.sh
-> You can put custom start script in [Image]/[Tag]/root/ or [Image]/[Tag]/custom/
-* /start.sh
-> You can put custom start script in [Image]/[Tag]/root/ or [Image]/[Tag]/custom/
+## Installation
+```
+curl -Ls https://raw.github.com/tsaikd/docker-builder/master/install.sh | bash
+```
 
 ## Build images
 Build ubuntu images on your local docker host.
 ```
-./build.sh ubuntu/stable
+docker-builder ubuntu/stable
 ```
 
 ## Supported images
 ```
-./build.sh -l
+docker-builder -l
 ```
 
 ## Run application example
 
 * [net-dns/dnsmasq/latest](net-dns/dnsmasq/latest)
-* [net-misc/openvpn/latest](net-misc/openvpn/latest)
 
 ```
 docker run -itd -p 80:80 tsaikd/www-servers.nginx:latest
@@ -47,8 +39,20 @@ docker run -i -t -d -p 8080:8080 -v /data/webapps:/var/lib/tomcat7/webapps tsaik
 docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/dev-db.solr:4.7.0
 ```
 
+## Global customization
+* `[Image]/[Tag]/root/`
+	* Put build time customization file here will copy to container root ('/')
+* `[Image]/[Tag]/custom/`
+	* Put run time customization file here will copy to container root ('/')
+
+## Custom start script
+* `/start-pre.sh`
+	* You can put custom start script in `[Image]/[Tag]/root/` or `[Image]/[Tag]/custom/`
+* `/start.sh`
+	* You can put custom start script in `[Image]/[Tag]/root/` or `[Image]/[Tag]/custom/`
+
 ## More customization
-* config.sh (see config.sh.sample for more detail)
+* `config.sh` (see `config.sh.sample` for more detail)
 
 ## Image structure
 * Image name (ubuntu)
@@ -122,12 +126,13 @@ docker run -i -t -d -p 8983:8983 -v /data/solr:/data/solr tsaikd/dev-db.solr:4.7
 				* test-post.sh
 
 ## Config loading order
-* ./config.sh.sample
-* ./config.sh
-* ./Image/config.sh
-* ./Image/Tag/config.sh
-* ./Image/Tag/root/config.sh
-* ./Image/Tag/custom/config.sh
+* /usr/docker-builder/config.sh.sample
+* /usr/docker-builder/config.sh
+* /etc/docker-builder/config.sh
+* ${HOME}/.config/docker-builder/config.sh
+* /usr/docker-builder/Image/Tag/config.sh
+* /usr/docker-builder/Image/Tag/root/config.sh
+* /usr/docker-builder/Image/Tag/custom/config.sh
 	* This config can change at run time, others are generated at build time
 
 ===========================
