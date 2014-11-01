@@ -5,6 +5,13 @@ set -e
 PN="${BASH_SOURCE[0]##*/}"
 PD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+if [ ! -f "${PD}/config.sh.sample" ] ; then
+	PD="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+	if [ ! -f "${PD}/config.sh.sample" ] ; then
+		PD="/usr/docker-builder"
+	fi
+fi
+
 source "${PD}/config.sh.sample"
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
 
