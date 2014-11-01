@@ -5,26 +5,26 @@
 # support private registry
 # ex: 192.168.0.1:5000/tsaikd
 # ex: 192.168.0.1:5000
-export DOCKER_BASE="tsaikd"
+export DOCKER_BASE="${DOCKER_BASE:-tsaikd}"
 
 # reset language
-export LANG="en_US.UTF-8"
+export LANG="${DOCKER_LANG:-en_US.UTF-8}"
 
 # all supported language, seperated by space
 # ex: zh_TW.UTF-8 zh_CN.UTF-8 ja_JP.UTF-8 ko_KR.UTF-8
-export SUPPORT_LANG=""
+export SUPPORT_LANG="${SUPPORT_LANG}"
 
 # timezone, it should exists in sub folder of /usr/share/zoneinfo
 # ex: Asia/Taipei
-export TIMEZONE="UTC"
+export TIMEZONE="${TIMEZONE:-UTC}"
 
 # apt-proxy, ex: http://apt.tsaikd.org:3142/
-export APT_PROXY=""
+export APT_PROXY="${APT_PROXY}"
 
 # apt-site
 # ex: http://tw.archive.ubuntu.com/ubuntu/
 # ex: http://free.nchc.org.tw/ubuntu/
-export APT_SITE=""
+export APT_SITE="${APT_SIZE}"
 
 # GUI application additional inherit path, seperated by space
 # ex: net-misc/openssh/latest
@@ -34,33 +34,9 @@ export GUI_INHERIT="net-misc/openssh/latest"
 
 # root password, used in dev mode
 # Note: you can not use 'CHANGE_IT' as your root password
-export ROOT_PASSWD="CHANGE_IT"
+export ROOT_PASSWD="${ROOT_PASSWD:-CHANGE_IT}"
 
 # root ssh key path, used in dev mode, seperated with space
 # ex: /root/.ssh/id_rsa.pub
-export ROOT_PUBKEY=""
-
-# tomcat manager name
-export TOMCAT_ADMIN_NAME="admin"
-
-# tomcat manager password
-export TOMCAT_ADMIN_PASSWORD="${ROOT_PASSWD}"
-
-# solr home, ex: /data/solr
-export SOLR_HOME="/data/solr"
-
-# solr options, ex: -Xmx2000m -XX:MaxPermSize=2000m
-export SOLR_JAVA_OPTS="-Xmx2000m -XX:MaxPermSize=2000m"
-
-# mysql root password
-export MYSQL_ROOT_PASSWD="${ROOT_PASSWD}"
-
-# phpvirtualbox virtualbox run user
-export PHPVIRTUALBOX_RUN_USER="vbox"
-
-# phpvirtualbox virtualbox run user password
-export PHPVIRTUALBOX_RUN_PASS="${ROOT_PASSWD}"
-
-# phpvirtualbox virtualbox link to vboxwebsrv url
-export PHPVIRTUALBOX_VBOXWEBSRV_URL="http://127.0.0.1:18083/"
+export ROOT_PUBKEY="${ROOT_PUBKEY}"
 
