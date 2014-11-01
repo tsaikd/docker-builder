@@ -14,6 +14,8 @@ fi
 
 source "${PD}/config.sh.sample"
 [ -f "${PD}/config.sh" ] && source "${PD}/config.sh"
+[ -f "/etc/docker-builder/config.sh" ] && source "/etc/docker-builder/config.sh"
+[ -f "${HOME}/.config/docker-builder/config.sh" ] && source "${HOME}/.config/docker-builder/config.sh"
 
 function usage() {
 	cat <<EOF
