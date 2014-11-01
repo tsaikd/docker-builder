@@ -345,6 +345,8 @@ function build() {
 	chmod +x build-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> build-all.sh
 	cat_one_file "${PD}/config.sh" >> build-all.sh
+	cat_one_file "/etc/docker-builder/config.sh" >> build-all.sh
+	cat_one_file "${HOME}/.config/docker-builder/config.sh" >> build-all.sh
 	cat_one_file "config.sh" >> build-all.sh
 	cat_one_file "build-pre.sh" "${PD}/ubuntu/stable/build-pre.sh" >> build-all.sh
 	if [ "${auto_apt_get}" ] ; then
@@ -369,6 +371,8 @@ function build() {
 	chmod +x test-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> test-all.sh
 	cat_one_file "${PD}/config.sh" >> test-all.sh
+	cat_one_file "/etc/docker-builder/config.sh" >> test-all.sh
+	cat_one_file "${HOME}/.config/docker-builder/config.sh" >> test-all.sh
 	cat_one_file "config.sh" >> test-all.sh
 	cat_one_file "test-pre.sh" "${PD}/ubuntu/stable/test-pre.sh" >> test-all.sh
 	cat_parent_docker_file "test.sh" >> test-all.sh
@@ -389,6 +393,8 @@ function build() {
 	chmod +x start-all.sh
 	cat_one_file "${PD}/config.sh.sample" >> start-all.sh
 	cat_one_file "${PD}/config.sh" >> start-all.sh
+	cat_one_file "/etc/docker-builder/config.sh" >> start-all.sh
+	cat_one_file "${HOME}/.config/docker-builder/config.sh" >> start-all.sh
 	cat_one_file "config.sh" >> start-all.sh
 	cat_one_file "start-pre.sh" "${PD}/ubuntu/stable/start-pre.sh" >> start-all.sh
 	cat_parent_docker_file "start.sh" >> start-all.sh
