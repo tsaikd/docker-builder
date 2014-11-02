@@ -24,7 +24,7 @@ export APT_PROXY="${APT_PROXY}"
 # apt-site
 # ex: http://tw.archive.ubuntu.com/ubuntu/
 # ex: http://free.nchc.org.tw/ubuntu/
-export APT_SITE="${APT_SIZE}"
+export APT_SITE="${APT_SITE}"
 
 # GUI application additional inherit path, seperated by space
 # ex: net-misc/openssh/latest

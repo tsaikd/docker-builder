@@ -1,11 +1,5 @@
 #!/bin/bash
 
-if [ "${APT_SITE}" ] ; then
-	echo "deb ${APT_SITE} trusty main universe" > /etc/apt/sources.list
-	echo "deb ${APT_SITE} trusty-updates main universe" >> /etc/apt/sources.list
-	echo "deb ${APT_SITE} trusty-security main universe" >> /etc/apt/sources.list
-fi
-
 # docker official ubuntu built-in apt clean patch
 if [ ! -f "/etc/apt/apt.conf.d/docker-clean" ] ; then
 	cat > /etc/apt/apt.conf.d/02nocache <<EOF

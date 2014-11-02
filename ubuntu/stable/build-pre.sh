@@ -10,5 +10,9 @@ if [ "${APT_PROXY}" ] ; then
 	echo "Acquire::http::proxy \"${APT_PROXY}\";" >> /etc/apt/apt.conf
 fi
 
+if [ "${APT_SITE}" ] ; then
+	sed -i "s|^deb\\(-src\\)\\? [^ ]* trusty\\(.*\\)$|deb\\1 ${APT_SITE} trusty\\2|g" /etc/apt/sources.list
+fi
+
 true
 
