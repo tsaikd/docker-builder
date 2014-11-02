@@ -158,7 +158,11 @@ function process_download_file() {
 			filename="$(awk '{print $1}' <<<"${line}")"
 			url="$(awk '{print $2}' <<<"${line}")"
 			if ! check_copy_file "${filename}" ; then
-				wget -O "${filename}" "${url}"
+				if [ -w . ] ; then
+					wget -O "${filename}" "${url}"
+				else
+					sudo wget -O "${filename}" "${url}"
+				fi
 			fi
 		done <<<"$(sed -n '/^\s*[^#]/p' "download")"
 	fi
