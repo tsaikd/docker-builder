@@ -57,8 +57,8 @@
             <li class="fragment">distro-specific customization</li>
             <li class="fragment">configurable image prefix</li>
             <li class="fragment"><b><i>multiple</i></b> inheritance</li>
-            <li class="fragment">custom startup script</li>
-            <li class="fragment">minimal dependency (written in pure BASH)</li>
+            <li class="fragment">startup hook</li>
+            <li class="fragment">minimal dependency (written in pure Bash)</li>
           </ul>
 				</section>
 
@@ -128,13 +128,16 @@ $ docker-builder dev-lang/golang/1.3.3
 
         <section>
           <section>
-            <h4>custom startup script</h4>
+            <h4>startup hook</h4>
             <small>feed startup script to container</small>
             <pre><code class="bash" data-trim contenteditable>
 $ cat &gt; ci-job.sh &lt;&lt;EOF
+#!/bin/bash
+
 git clone https://github.com/sinatra/sinatra.git sinatra
 cd sinatra && bundle install
-exec rake test
+rake test
+exit $?
 EOF
 
 # Feed task to container
@@ -152,9 +155,14 @@ $ docker run -it -v $PWD/ci-job.sh:/start.sh &lt;container-id&gt;
             <li class="fragment">net-p2p/rtorrent</li>
             <li class="fragment">app-editors/sublimetext + media-fonts/notofonts</li>
             <li class="fragment">net-wireless/hostapd</li>
+            <li class="fragment">... visit our Github page to see a full list</li>
           </ul>
           <br /><br />
-          <p class="fragment"><small>Any Gentoo user here?</small></p>
+          <p class="fragment"><small>Any Gentoo user there?</small></p>
+        </section>
+
+        <section>
+          <h3>QUICK DEMO</h3>
         </section>
 
         <section>
