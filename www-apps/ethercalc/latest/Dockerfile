@@ -1,0 +1,14 @@
+FROM DOCKER_BASE/net-libs/nodejs/ppa
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+
+EXPOSE 8000
+
+ADD . $DOCKER_SRC
+
+RUN
+
+CMD
+
