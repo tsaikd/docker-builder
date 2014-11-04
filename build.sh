@@ -193,6 +193,7 @@ function build() {
 	local dev_mode
 	local inherit
 	local old_imgid
+	local guesspath
 
 	if ( [ "${tag}" == "dev" ] || [ "${tag:${#tag}-4}" == "-dev" ] ) && [ ! -d "${PD}/${buildpath}" ] ; then
 		if [ "${tag}" == "dev" ] ; then
@@ -220,8 +221,13 @@ function build() {
 		popd >/dev/null
 	else
 		if [ ! -f "${PD}/${buildpath}/Dockerfile" ] ; then
-			echo "${buildpath} is invalid package" >&2
-			exit 1
+			guesspath="$(guess_package "${buildpath}")"
+			if [ "${guesspath}" ] ; then
+				build "${guesspath}"
+			else
+				echo "${buildpath} is invalid package" >&2
+				exit 1
+			fi
 		fi
 
 		process_download_file "${buildpath}"
@@ -430,6 +436,31 @@ function build() {
 	popd >/dev/null
 }
 
+function guess_package() {
+	local name="${1}"
+	local pkgs
+	if [ ! -f "${PD}/${name}/Dockerfile" ] ; then
+		pkgs="$(list_package | grep "${name}")"
+		if [ -z "${pkgs}" ] ; then
+			echo "no package found: ${name}" >&2
+			return 1
+		fi
+		if [ "$(wc -l <<<"${pkgs}")" -eq 1 ] ; then
+			echo "${pkgs}"
+			return 0
+		else
+			echo "do you mean $(echo ${pkgs}) ?" >&2
+			return 1
+		fi
+	fi
+}
+
+function list_package() {
+	pushd "${PD}" >/dev/null
+	find -iname Dockerfile | sed 's|^./||g;s|/Dockerfile$||g;/^tmp\//d'
+	popd >/dev/null
+}
+
 function rebuild() {
 	echo "Collecting current images info ..."
 	local images="$(${docker} images | sed "1d" | grep "^${DOCKER_BASE}/" | awk '{print $1"/"$2}' | cut -c$((${#DOCKER_BASE} + 2))- | sed "s/\./\\//g")"
@@ -464,9 +495,7 @@ function rebuild() {
 }
 
 if [ "${FLAG_LIST}" == "1" ] ; then
-	pushd "${PD}" >/dev/null
-	find -iname Dockerfile | sed 's|^./||g;s|/Dockerfile$||g;/^tmp\//d'
-	popd >/dev/null
+	list_package
 elif [ "${FLAG_REBUILD}" == "1" ] ; then
 	rebuild
 elif [ -f "${FLAG_LISTFILE}" ] ; then
