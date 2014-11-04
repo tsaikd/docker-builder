@@ -147,6 +147,14 @@ function cat_inherit() {
 	fi
 }
 
+function is_registry_base() {
+	if [ "$(grep "[\\.:]" <<<"${DOCKER_BASE}")" ] ; then
+		return 0
+	else
+		return 1
+	fi
+}
+
 function process_download_file() {
 	local folder="${1%%/}"
 	[ "${folder:0:1}" != "/" ] && folder="${PD}/${folder}"
@@ -257,8 +265,8 @@ function build() {
 		parent_imgpath="$(echo "${parent_imgname}" | sed 's/\./\//g')"
 		parent_tag="$(cut -d: -f2 <<<"${line}")"
 		parent_tag="${parent_tag:-latest}"
-		if [ "${FLAG_LOCAL}" != "1" ] && [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
-			# update parent image by docker pull if in private registory
+		if [ "${FLAG_LOCAL}" != "1" ] && is_registry_base ; then
+			# update parent image by docker pull if in private registry
 			if ! ${docker} pull "${DOCKER_BASE}/${parent_imgname}:${parent_tag}" ; then
 				# pull parent image failed, build parent
 				build "${parent_imgpath}/${parent_tag}"
@@ -428,8 +436,8 @@ function build() {
 
 	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" .
 
-	# push to private registory
-	if [ "${FLAG_LOCAL}" != "1" ] && [ "$(grep ":" <<<"${DOCKER_BASE}")" ] ; then
+	# push to private registry
+	if [ "${FLAG_LOCAL}" != "1" ] && is_registry_base ; then
 		${docker} push "${DOCKER_BASE}/${imgname}:${tag}"
 	fi
 
