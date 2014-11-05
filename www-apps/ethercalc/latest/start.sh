@@ -1,4 +1,4 @@
 #!/bin/bash
 
-ethercalc &
+ethercalc ${ETHERCALC_OPTS} &
 
