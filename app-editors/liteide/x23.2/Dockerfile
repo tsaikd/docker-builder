@@ -1,4 +1,4 @@
-FROM DOCKER_BASE/dev-lang/golang/1.3.1
+FROM DOCKER_BASE/dev-lang/golang/1.3.3
 
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
