@@ -232,6 +232,7 @@ function build() {
 			guesspath="$(guess_package "${buildpath}")"
 			if [ "${guesspath}" ] ; then
 				build "${guesspath}"
+				return $?
 			else
 				echo "${buildpath} is invalid package" >&2
 				exit 1
