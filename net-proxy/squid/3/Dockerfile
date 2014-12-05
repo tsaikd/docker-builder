@@ -10,7 +10,7 @@ ADD . $DOCKER_SRC
 
 RUN
 
-CMD
+ENTRYPOINT
 
 VOLUME ["/var/spool/squid3", "/var/log/squid3"]
 

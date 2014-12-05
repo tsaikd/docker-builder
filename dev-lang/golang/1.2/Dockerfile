@@ -15,5 +15,5 @@ RUN mkdir -p /opt/go
 
 RUN
 
-CMD
+ENTRYPOINT
 
