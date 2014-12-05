@@ -18,6 +18,13 @@ function wait_iface() {
 	return 0
 }
 
+function docker_builder_trap_term() {
+	echo "Send signal TERM to all subprocess ..."
+	pkill -TERM -P $$
+}
+
+trap "docker_builder_trap_term" TERM
+
 if [ -f /config.sh ] ; then
 	source /config.sh
 fi
@@ -29,6 +36,4 @@ fi
 if [ -f "/start-pre.sh" ] ; then
 	source "/start-pre.sh"
 fi
-
-true
 

@@ -282,7 +282,7 @@ function build() {
 	sed -i "/^ENV DOCKER_SRC$/c \\ENV DOCKER_SRC /opt/docker/DOCKER_BASE/${buildpath}" "Dockerfile"
 	sed -i "/^RUN$/c \\RUN bash --login \$DOCKER_SRC/build-all.sh" "Dockerfile"
 	sed -i "/^CMD$/c \\CMD bash --login \$DOCKER_SRC/start-all.sh" "Dockerfile"
-	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\", \"/opt/docker/DOCKER_BASE/${buildpath}/start-all.sh\"]" "Dockerfile"
+	sed -i "/^ENTRYPOINT$/c \\ENTRYPOINT [\"/bin/bash\", \"--login\"]" "Dockerfile"
 	sed -i "s|DOCKER_BASE|${DOCKER_BASE}|g" "Dockerfile"
 
 	# generate root ssh key file

@@ -8,6 +8,13 @@ export DOCKER_BUILDING="1"
 
 if [ -f "${DOCKER_SRC}/start-all.sh" ] ; then
 	bash "${DOCKER_SRC}/start-all.sh"
+	cat <<EOF >"/etc/profile.d/50-docker-builder-start-all.sh"
+#!/bin/bash
+if [ "\$\$" == 1 ] ; then
+$(cat "${DOCKER_SRC}/start-all.sh")
+set +e
+fi
+EOF
 fi
 
 if [ -f "${DOCKER_SRC}/test-all.sh" ] ; then
