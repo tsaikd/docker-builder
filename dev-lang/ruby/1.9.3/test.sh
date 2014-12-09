@@ -5,8 +5,6 @@ for i in ruby gem ; do
 	type "${i}" &>/dev/null
 done
 
-echo "Testing go version ..."
+echo "Testing ruby version ..."
 [ -z "$(ruby -v 2>&1 | grep "ruby 1.9.3")" ] && exit 1
-
-true
 
