@@ -10,5 +10,3 @@ for i in 8080 ; do
 	done
 done
 
-true
-
