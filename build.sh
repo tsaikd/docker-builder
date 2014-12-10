@@ -273,7 +273,9 @@ function build() {
 				build "${parent_imgpath}/${parent_tag}"
 			fi
 		fi
-		if [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
+		if [ "$(sed "s/#.*$//g; /^\s*$/d" Dockerfile | wc -l)" -eq 1 ] ; then # alias mode Dockerfile
+			build "${parent_imgpath}/${parent_tag}"
+		elif [ -z "$(${docker} images "${DOCKER_BASE}/${parent_imgname}" | sed "1d" | awk '{print $2}' | grep "^${parent_tag}\$")" ] ; then
 			build "${parent_imgpath}/${parent_tag}"
 		fi
 	fi
@@ -299,7 +301,6 @@ function build() {
 	> inherit
 
 	# check inherit of inherit
-	echo "Checking inherit list ..."
 	cat_inherit "${parent_imgpath}/${parent_tag}" >> pinherit
 	cat_inherit "${buildpath}" >> inherit
 
@@ -435,6 +436,7 @@ function build() {
 		${docker} tag "${old_imgid}" "${DOCKER_BASE}/${imgname}:${tag}-$(date "+%Y%m%d-%H%M%S")"
 	fi
 
+	echo "Building ${DOCKER_BASE}/${imgname}:${tag} ..."
 	${docker} build -t "${DOCKER_BASE}/${imgname}:${tag}" .
 
 	# push to private registry
