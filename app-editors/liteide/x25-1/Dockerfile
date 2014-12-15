@@ -1,0 +1,15 @@
+FROM DOCKER_BASE/dev-lang/golang/1.4
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV LITEIDE_VERSION x25-1
+ENV LITEIDE_HOME /usr/local/liteide
+ENV PATH $LITEIDE_HOME/bin:$PATH
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
