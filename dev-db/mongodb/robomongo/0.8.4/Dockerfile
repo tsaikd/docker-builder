@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/ubuntu:stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV ROBOMONGO_VERSION 0.8.4
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
