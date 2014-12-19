@@ -3,6 +3,7 @@ FROM DOCKER_BASE/www-servers/tomcat/7
 MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC
+ENV NEXUS_VERSION 2.7.2
 
 EXPOSE 8080
 
