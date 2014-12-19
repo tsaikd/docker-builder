@@ -110,10 +110,19 @@ function cat_one_file() {
 }
 
 function cat_parent_docker_file() {
-	local parent_buildpath="$(grep "^FROM ${DOCKER_BASE}/" Dockerfile | cut -c$((${#DOCKER_BASE} + 7))- | sed 's/[\.:]/\//g')"
-	local parent_docker="${PD}/${parent_buildpath}"
+	local parent_buildpath="$(grep "^#ORIGIN_FROM ${DOCKER_BASE}/" Dockerfile | cut -c$((${#DOCKER_BASE} + 15))- | sed 's/:/\//g')"
 	local curdir="${PWD}"
+	local parent_docker
 	local f
+
+	if [ -z "${parent_buildpath}" ] ; then
+		parent_buildpath="$(grep "^FROM DOCKER_BASE/" Dockerfile | cut -c18- | sed 's/:/\//g')"
+	fi
+	if [ -z "${parent_buildpath}" ] ; then
+		parent_buildpath="$(grep "^FROM ${DOCKER_BASE}/" Dockerfile | cut -c$((${#DOCKER_BASE} + 7))- | sed 's/:/\//g')"
+	fi
+
+	parent_docker="${PD}/${parent_buildpath}"
 
 	[ -z "${parent_buildpath}" ] && return
 	[ ! -d "${parent_docker}" ] && return
@@ -254,7 +263,7 @@ function build() {
 	line="$(sed -n '/^FROM DOCKER_BASE\//p' "Dockerfile")"
 	if [ "${line}" ] ; then
 		if [ -z "$(grep ":" <<<"${line}")" ] ; then
-			line="$(echo "${line}" | sed -r 's/\/([^/]*?)$/:\1/' | sed 's/\//./g' | sed 's/^FROM DOCKER_BASE\./FROM DOCKER_BASE\//')"
+			line="#ORIGIN_${line}\n$(echo "${line}" | sed -r 's/\/([^/]*?)$/:\1/' | sed 's/\//./g' | sed 's/^FROM DOCKER_BASE\./FROM DOCKER_BASE\//')"
 			sed -i "/^FROM DOCKER_BASE/c \\${line}" "Dockerfile"
 		fi
 	fi
