@@ -327,6 +327,12 @@ function build() {
 
 	# process inherit function
 	while read inherit ; do
+		[ -z "${inherit}" ] && continue
+
+		# patch inherit env
+		line="$(cat_one_file "${PD}/${inherit}/Dockerfile" | grep "^ENV " | grep -v "^ENV DOCKER_SRC\$")"
+		sed -i "/^ENV DOCKER_SRC /a \\${line}" "Dockerfile"
+
 		# process inherit download file
 		cat_one_file "${PD}/${inherit}/download" >> "download"
 		cat_one_file "${PD}/${inherit}/sha1sum" >> "sha1sum"
@@ -336,10 +342,10 @@ function build() {
 		if [ -d "${PD}/${inherit}/root" ] ; then
 			cp -aL "${PD}/${inherit}/root" ./
 		fi
-	done <<<"$(cat_one_file "inherit")"
-	sed -i '/^\s*$/d;/^\s*#/d' "download"
-	sed -i '/^\s*$/d;/^\s*#/d' "sha1sum"
-	sed -i '/^\s*$/d;/^\s*#/d' "md5sum"
+	done <<<"$(cat "inherit")"
+	[ -s "download" ] && sed -i '/^\s*$/d;/^\s*#/d' "download"
+	[ -s "sha1sum" ] && sed -i '/^\s*$/d;/^\s*#/d' "sha1sum"
+	[ -s "md5sum" ] && sed -i '/^\s*$/d;/^\s*#/d' "md5sum"
 	process_download_file "${DOCKER_TMP}/${buildpath}"
 
 	# check necessary to auto apt-get update and clean
