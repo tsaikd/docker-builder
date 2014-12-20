@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/ubuntu/stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV CONFD_VERSION 0.7.1
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
