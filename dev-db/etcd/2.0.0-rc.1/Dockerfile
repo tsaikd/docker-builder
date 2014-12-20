@@ -1,0 +1,16 @@
+FROM DOCKER_BASE/ubuntu/stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV ETCD_VER v2.0.0-rc.1
+ENV PATH $PATH:/usr/local/etcd
+
+EXPOSE 4001 7001 2379 2380
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
