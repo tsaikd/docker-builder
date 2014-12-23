@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/ubuntu/stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV SKYDNS_VERSION 2.0.1d
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
