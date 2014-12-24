@@ -8,3 +8,8 @@ if [ -f "/start.sh" ] ; then
 	source "/start.sh"
 fi
 
+if [ "${DOCKER_WAITEXIT}" ] ; then
+	wait
+	exit
+fi
+
