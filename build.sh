@@ -330,8 +330,10 @@ function build() {
 		[ -z "${inherit}" ] && continue
 
 		# patch inherit env
-		line="$(cat_one_file "${PD}/${inherit}/Dockerfile" | grep "^ENV " | grep -v "^ENV DOCKER_SRC\$")"
-		sed -i "/^ENV DOCKER_SRC /a \\${line}" "Dockerfile"
+		line="$(cat_one_file "${PD}/${inherit}/Dockerfile" | grep "^ENV " | grep -v "^ENV DOCKER_SRC\$")" || true
+		if [ "${line}" ] ; then
+			sed -i "/^ENV DOCKER_SRC /a \\${line}" "Dockerfile"
+		fi
 
 		# process inherit download file
 		cat_one_file "${PD}/${inherit}/download" >> "download"
