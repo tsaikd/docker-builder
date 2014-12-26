@@ -1,0 +1,29 @@
+#!/bin/bash
+# set ENV:
+# CFKEY=API-key
+# CFUSER=username(email)
+# CFHOST=host1-you-want-to-change,host2-you-want-to-change
+# CFINTERVAL=check-interval-seconds
+
+function main() {
+	if [ "${CFKEY}" ] && [ "${CFUSER}" ] && [ "${CFHOST}" ] ; then
+		tmpfile="${tmpfile:-/tmp/cf-ddns-wan-ip.txt}"
+		touch "${tmpfile}"
+	 
+		if [ -z "${WAN_IP}" ] ; then
+			WAN_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+		fi
+	 
+		if [ "${WAN_IP}" != "$(cat "${tmpfile}")" ] ; then
+			printf "%s" "${WAN_IP}" > "${tmpfile}"
+			echo "$(date) Update ${CFHOST} to ${WAN_IP}"
+			curl -s "https://www.cloudflare.com/api.html?a=DIUP&ip=${WAN_IP}&u=${CFUSER}&tkn=${CFKEY}&hosts=${CFHOST}"
+		fi
+	fi
+}
+
+while ((1)) ; do
+	main
+	sleep "${CFINTERVAL:-300}"
+done
+
