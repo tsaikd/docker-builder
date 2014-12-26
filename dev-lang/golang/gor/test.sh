@@ -5,5 +5,3 @@ for i in gor ; do
 	type "${i}" &>/dev/null
 done
 
-true
-
