@@ -5,5 +5,3 @@ for i in openvpn easyrsa ; do
 	type "${i}" &>/dev/null
 done
 
-true
-

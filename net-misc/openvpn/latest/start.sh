@@ -6,9 +6,10 @@ export EASYRSA="${EASYRSA:-/usr/local/easy-rsa/easyrsa3}"
 export EASYRSA_PKI="${EASYRSA_PKI:-/etc/openvpn/pki}"
 export EASYRSA_BATCH="true"
 
-mkdir -p "/etc/openvpn"
-if [ ! -f "/etc/openvpn/openvpn.conf" ] ; then
-	cat > "/etc/openvpn/openvpn.conf" <<-EOF
+if [ "${DOCKER_BUILDING}" != 1 ] ; then
+	mkdir -p "/etc/openvpn"
+	if [ ! -f "/etc/openvpn/openvpn.conf" ] ; then
+		cat > "/etc/openvpn/openvpn.conf" <<-EOF
 server 192.168.255.0 255.255.255.0
 verb 3
 #duplicate-cn
@@ -33,37 +34,31 @@ dev tun0
 status /tmp/openvpn-status.log
 
 client-config-dir /etc/openvpn/ccd
-	EOF
-fi
-
-if [ ! -d "/etc/openvpn/pki" ] ; then
-	easyrsa init-pki
-
-	easyrsa build-ca nopass
-
-	easyrsa gen-dh
-
-	easyrsa gen-crl
-
-	openvpn --genkey --secret /etc/openvpn/pki/ta.key
-
-	easyrsa build-server-full "server" nopass
-fi
-
-mkdir -p /etc/openvpn/ccd
-
-if [ -w "/sys" ] ; then
-	mkdir -p /dev/net
-	if [ ! -c /dev/net/tun ]; then
-	    mknod /dev/net/tun c 10 200
+		EOF
 	fi
 
-	iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
+	if [ ! -d "/etc/openvpn/pki" ] ; then
+		easyrsa init-pki
+		easyrsa build-ca nopass
+		easyrsa gen-dh
+		easyrsa gen-crl
+		openvpn --genkey --secret /etc/openvpn/pki/ta.key
+		easyrsa build-server-full "server" nopass
+	fi
 
-	openvpn --config "/etc/openvpn/openvpn.conf" &
-else
-	echo "Please run container in privileged mode!"
+	mkdir -p /etc/openvpn/ccd
+
+	if [ -w "/sys" ] ; then
+		mkdir -p /dev/net
+		if [ ! -c /dev/net/tun ]; then
+		    mknod /dev/net/tun c 10 200
+		fi
+
+		iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
+
+		openvpn --config "/etc/openvpn/openvpn.conf" &
+	else
+		echo "Please run container in privileged mode!"
+	fi
 fi
-
-true
 

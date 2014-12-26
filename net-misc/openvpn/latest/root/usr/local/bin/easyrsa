@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bash -l /usr/local/easy-rsa/easyrsa3/easyrsa "$@"
+
