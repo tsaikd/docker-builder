@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/ubuntu/stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV REDIS_VERSION 3.0.0-rc1
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
