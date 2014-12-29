@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sysd &
+sysd ${SYSD_OPTS} &
 

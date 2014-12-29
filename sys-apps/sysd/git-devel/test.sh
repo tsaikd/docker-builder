@@ -8,7 +8,7 @@ for i in sysd ; do
 done
 
 
-for i in 8080 ; do
+for i in 8 ; do
 	echo "Testing tcp port ${i} is opened ..."
 	while [ -z "$(netstat -tln | grep "${i} ")" ] ; do
 		[ "$(date +%s)" -gt "${maxtime}" ] && exit 1
@@ -16,11 +16,13 @@ for i in 8080 ; do
 	done
 done
 
-for i in http://localhost:8080/apilist ; do
-	echo "Testing http request ${i} ..."
-	while [ -z "$(http_proxy="" curl -sIk -m 9 -XGET "${i}" | sed -n "1{/200/p}")" ] ; do
-		[ "$(date +%s)" -gt "${maxtime}" ] && exit 1
-		sleep 1
-	done
+echo "Testing url http://localhost:8/apilist is valid ..."
+while ((1)) ; do
+	[ "$(date +%s)" -gt "${maxtime}" ] && exit 1
+	if exec 5<> /dev/tcp/localhost/8 ; then
+		echo -e "GET /apilist HTTP/1.0\r\nHost: localhost\r\n\r\n" >&5
+		[ "$(cat <&5 | grep "HTTP/1.0 200 OK")" ] && break
+	fi
+	sleep 1
 done
 
