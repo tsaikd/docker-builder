@@ -10,9 +10,7 @@ function main() {
 		tmpfile="${tmpfile:-/tmp/cf-ddns-wan-ip.txt}"
 		touch "${tmpfile}"
 	 
-		if [ -z "${WAN_IP}" ] ; then
-			WAN_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-		fi
+		WAN_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
 	 
 		if [ "${WAN_IP}" != "$(cat "${tmpfile}")" ] ; then
 			printf "%s" "${WAN_IP}" > "${tmpfile}"
