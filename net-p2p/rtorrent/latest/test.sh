@@ -5,5 +5,3 @@ for i in rtorrent ; do
 	type "${i}" &>/dev/null
 done
 
-true
-

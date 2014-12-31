@@ -4,7 +4,7 @@ MAINTAINER tsaikd "tsaikd@gmail.com"
 
 ENV DOCKER_SRC
 
-EXPOSE 22
+EXPOSE 5000
 
 ADD . $DOCKER_SRC
 
