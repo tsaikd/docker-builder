@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/www-servers/nginx/ppa
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV RUTORRENT_VERSION 3.6
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
