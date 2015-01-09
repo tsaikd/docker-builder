@@ -1,0 +1,13 @@
+FROM DOCKER_BASE/ubuntu:stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV MONGODB_VERSION 2.6.6
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
