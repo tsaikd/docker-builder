@@ -1,0 +1,15 @@
+FROM DOCKER_BASE/ubuntu/stable
+
+MAINTAINER tsaikd "tsaikd@gmail.com"
+
+ENV DOCKER_SRC
+ENV KIBANA_VER 3.1.2
+
+EXPOSE 80
+
+ADD . $DOCKER_SRC
+
+RUN
+
+ENTRYPOINT
+
