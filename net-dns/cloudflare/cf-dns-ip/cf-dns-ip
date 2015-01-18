@@ -2,20 +2,26 @@
 # set ENV:
 # CFKEY=API-key
 # CFUSER=username(email)
+# CFZONE=zone-name
+# CFDNIP=x.x.x.x # keep empty for auto detect
 # CFHOST=host1-you-want-to-change,host2-you-want-to-change
-# CFINTERVAL=check-interval-seconds
+# CFTYPE=A,CNAME # effect rec type
 
 tmpfile="${tmpfile:-/tmp/cf-ddns-wan-ip.txt}"
 
 function main() {
 	if [ "${CFKEY}" ] && [ "${CFUSER}" ] && [ "${CFHOST}" ] ; then
-		WAN_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+		if [ "${CFDNIP}" ] ; then
+			WAN_IP="${CFDNIP}"
+		else
+			WAN_IP="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+		fi
 	 
 		touch "${tmpfile}"
 		if [ "${WAN_IP}" != "$(cat "${tmpfile}")" ] ; then
 			printf "%s" "${WAN_IP}" > "${tmpfile}"
 			echo "$(date) Update ${CFHOST} to ${WAN_IP}"
-			curl -s "https://www.cloudflare.com/api.html?a=DIUP&ip=${WAN_IP}&u=${CFUSER}&tkn=${CFKEY}&hosts=${CFHOST}"
+			CFDNIP="${WAN_IP}" cf-dns-ip.py
 		fi
 	fi
 }
