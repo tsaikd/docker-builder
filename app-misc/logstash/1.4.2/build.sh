@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if ! type logstash &>/dev/null ; then
-	ver="1.4.2"
-	tar -C /usr/local -xzf "${DOCKER_SRC}/logstash-${ver}.tar.gz"
-	ln -s "/usr/local/logstash-${ver}/" "/usr/local/logstash"
+	mkdir -p /usr/local/logstash
+	tar -C /usr/local/logstash --strip-components=1 -xf "${DOCKER_SRC}/logstash-${LOGSTASH_VER}.tar.gz"
+	tar -C /usr/local/logstash --strip-components=1 -xf "${DOCKER_SRC}/logstash-contrib-${LOGSTASH_VER}.tar.gz"
 fi
 
