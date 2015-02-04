@@ -7,5 +7,3 @@ if ! type squid3 &>/dev/null ; then
 	sed -i "s/^#http_access allow localnet/http_access allow localnet/" /etc/squid3/squid.conf
 fi
 
-true
-

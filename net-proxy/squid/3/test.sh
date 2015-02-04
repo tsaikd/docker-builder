@@ -15,5 +15,3 @@ for i in 3128 ; do
 	done
 done
 
-true
-

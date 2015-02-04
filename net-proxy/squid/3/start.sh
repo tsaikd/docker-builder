@@ -7,5 +7,3 @@ fi
 
 squid3
 
-true
-

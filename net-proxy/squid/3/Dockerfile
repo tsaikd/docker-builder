@@ -12,5 +12,3 @@ RUN
 
 ENTRYPOINT
 
-VOLUME ["/var/spool/squid3", "/var/log/squid3"]
-
